@@ -5,7 +5,7 @@ Rcpp package implementation for the proposed technique [1] to compute marginal l
 
 2. Graphical horseshoe (GHS)
 
-3. Wishart and
+3. Wishart
 
 4. G-Wishart (including the case when precision matrix in banded)
 
