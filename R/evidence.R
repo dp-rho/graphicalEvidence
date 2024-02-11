@@ -1,5 +1,6 @@
 
 # R package documentation needed for each parameter
+
 # Top level function that is called by end user
 evidence <- function(
   xx,
@@ -33,7 +34,7 @@ evidence <- function(
     
     # First place to start work
     'G_Wishart' = graphical_evidence_G_Wishart(
-      xx, S, n, p, burnin, nmc, alpha, G
+      xx, S, n, p, burnin, nmc, alpha, V, G
     )
   )
   
