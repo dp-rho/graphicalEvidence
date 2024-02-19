@@ -11,11 +11,7 @@ graphical_evidence_G_Wishart <- function(
   alpha,
   V,
   G
-  # banded_param  # Necessary?
 ) {
-  
-  # Save start time
-  our_time <- proc.time()
   
   # make all matrix arguments matrices if they are not
   xx <- as.matrix(xx)
@@ -23,12 +19,9 @@ graphical_evidence_G_Wishart <- function(
   V <- as.matrix(V)
   G <- as.matrix(G)
   
-  ## Do we actually need is_banded ?  It appears this is just used to 
-  ## validate results as there exists a closed form solution when
-  ## a banded matrix is passed.  I am thinking we don't need the 
-  ## banded_param unless we want to add in the validation to this
-  ## function call as well
-  
+  # Detect available cores and assign to compiled program
+  num_cores <- parallel::detectCores()
+  set_cores(num_cores)
   
   # Call to Rcpp function should be here, might cut out banded inputs:
   # compiled_G_Wishart(
@@ -37,7 +30,7 @@ graphical_evidence_G_Wishart <- function(
   
   # Interpreted code implementation
   
-  # Initalize storage locations
+  # Initialize storage locations
   log_ratio_of_liklelihoods <- rep(0, p)
   
   log_data_likelihood <- rep(0, p)
@@ -110,13 +103,15 @@ graphical_evidence_G_Wishart <- function(
       
       log_gamma_posterior_density[num_G_Wishart] <-  MC_average_Equation_11
       
-      log_posterior_density[num_G_Wishart] <- MC_average_Equation_9 + MC_average_Equation_11
+      log_posterior_density[num_G_Wishart] <- (
+        MC_average_Equation_9 + MC_average_Equation_11
+      )
       
       st_dev <- sqrt(1 / post_mean_omega_22)
       
       ind_to_use <- 1:(p_reduced - 1)
       
-      mean_vec = -1 * st_dev^2 * (
+      mean_vec <- -1 * st_dev^2 * (
         as.matrix(reduced_data_xx[, ind_to_use]) %*% 
         as.matrix(post_mean_omega[p_reduced, ind_to_use])
       )
@@ -154,7 +149,7 @@ graphical_evidence_G_Wishart <- function(
         }
       }
       
-      inv_C <- (1 / post_mean_omega_22) * (
+      inv_C <- (1 / post_mean_omega_22) * as.matrix(
         scale_matrix_reduced[1:(p_reduced - 1), 1:(p_reduced - 1)]
       )
         
@@ -168,13 +163,14 @@ graphical_evidence_G_Wishart <- function(
             t(vec_accumulator_21_required) %*% inv_C_not_required
           )
           
-          mu_i_reduced <- -solve(inv_C_required) %*% (
+          mu_i_reduced <- -solve(
+            inv_C_required,
             (V_mat_12_required + vec_accumulator_21_required_modified)
           )
         }
         else {
-          mu_i_reduced <- -solve(inv_C_required) %*% (
-            V_mat_12_required + s_21_required
+          mu_i_reduced <- -solve(
+            inv_C_required, V_mat_12_required + s_21_required
           )
         }
         
@@ -262,7 +258,7 @@ graphical_evidence_G_Wishart <- function(
       
       V_mat_22 <- scale_matrix_reduced[p_reduced, p_reduced]
       
-      LOG_marginal_first_col_only = -(n * p_reduced / 2) * log(pi) + (
+      LOG_marginal_first_col_only <- -(n * p_reduced / 2) * log(pi) + (
         logmvgamma(alpha + (n / 2) + 1, p_reduced) -
         (alpha + (n / 2) + 1) * log(det(V_mat_22 + S_reduced)) - 
         logmvgamma(alpha + 1, p_reduced) + (alpha + 1) * log(V_mat_22)
@@ -272,7 +268,5 @@ graphical_evidence_G_Wishart <- function(
     }
     
   }
-  cat('Execution time:\n')
-  print(proc.time() - our_time)
   return(sum(log_ratio_of_liklelihoods))
 }

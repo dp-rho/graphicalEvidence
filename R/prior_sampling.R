@@ -57,10 +57,10 @@ prior_sampling <- function(
         inv_C_required <- inv_C[logi_which_ones, logi_which_ones]
         inv_C_chol_required <- chol(inv_C_required)
         V_mat_12_required = V_mat_12[logi_which_ones]
-        mu_i_reduced <- -solve(inv_C_required) %*% V_mat_12_required
+        mu_i_reduced <- -solve(inv_C_required, V_mat_12_required)
         beta_reduced <- (
           mu_i_reduced + (
-            solve(inv_C_chol_required) %*% rnorm(sum(which_ones))
+            solve(inv_C_chol_required, rnorm(sum(which_ones)))
           )
         )
 

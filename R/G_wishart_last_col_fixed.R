@@ -116,20 +116,21 @@ G_wishart_last_col_fixed <- function(
               temp_vec_accumulator_21_required %*% inv_C_not_required
             )
 
-            mu_i_reduced <- -solve(inv_C_required) %*% (
+            mu_i_reduced <- -solve(
+              inv_C_required,
               V_mat_12_required + s_21_tilde_required + 
               vec_accumulator_21_required_mod + 
               temp_vec_accumulator_21_required_mod
             )
             
             beta_reduced <- mu_i_reduced + (
-              solve(inv_C_chol_required) %*% rnorm(sum(which_ones))
+              solve(inv_C_chol_required, rnorm(sum(which_ones)))
             )
           }
           else {
-            mu_i_reduced <- -solve(inv_C_required) %*% rnorm(sum(which_ones))
+            mu_i_reduced <- -solve(inv_C_required, rnorm(sum(which_ones)))
             beta_reduced <- mu_i_reduced + (
-              solve(inv_C_chol_required) %*% rnorm(sum(which_ones))
+              solve(inv_C_chol_required, rnorm(sum(which_ones)))
             )
           }
           

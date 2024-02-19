@@ -96,7 +96,8 @@ G_wishart_Hao_wang <- function(
             t(vec_accumulator_21_required) %*% inv_C_not_required
           )
 
-          mu_i_reduced <- -solve(inv_C_required) %*% (
+          mu_i_reduced <- -solve(
+            inv_C_required,
             V_mat_12_required + S_21_required + vec_accumulator_21_required_mod
           )
           
@@ -106,13 +107,13 @@ G_wishart_Hao_wang <- function(
           }
           
           beta_reduced <- mu_i_reduced + (
-            solve(inv_C_chol_required) %*% rnorm(sum(which_ones))
+            solve(inv_C_chol_required, rnorm(sum(which_ones)))
           )
         }
         else {
           
-          mu_i_reduced <- -solve(inv_C_required) %*% (
-            V_mat_12_required + S_21_required
+          mu_i_reduced <- -solve(
+            inv_C_required, V_mat_12_required + S_21_required
           )
           
           if ((iter > burnin) & (i == p)) {
@@ -121,7 +122,7 @@ G_wishart_Hao_wang <- function(
           }
           
           beta_reduced <- mu_i_reduced + (
-            solve(inv_C_chol_required) %*% rnorm(sum(which_ones))
+            solve(inv_C_chol_required, rnorm(sum(which_ones)))
           )
         }
         
@@ -155,27 +156,61 @@ G_wishart_Hao_wang <- function(
   # Take accumulated mean of Omega from last nmc iterations
   post_mean_omega <- apply(omega_save, c(1, 2), mean)
   
+  # Initialize time to calculate vec_log_normal_density
+  cur_calc_time <- proc.time()
+  
+  ###################################
+  ## RcppArmadillo implementation ###
+  ###################################
+  
+  # RcppArmadillo implementation
+  ans_ls <-calc_eq_9(
+    which_ones, logi_which_ones, post_mean_omega, inv_C_required_store,
+    mean_vec_store, p, nmc
+  )
+
+  ### R code time profiling ###
+  calc_time <- proc.time() - cur_calc_time
+  g_time_env$vec_log_normal_calc_time <- (
+    g_time_env$vec_log_normal_calc_time + calc_time
+  )
+  ######################
+
+  return(list(post_mean_omega=ans_ls[[1]], MC_average_Equation_9=ans_ls[[2]]))
+
+  ###################################
+  ## Native R implementation      ###
+  ###################################
+  
   # Calculate vec_log_normal_density by iterating through sampled values
   # if relevant, if no non zero values in G_mat_last_col, mean Eq9 is 0
   if (!sum(which_ones)){
-    return(list(
-      post_mean_omega=post_mean_omega,
-      MC_average_Equation_9=0
-    ))
+    MC_average_Equation_9 <- 0
   }
-    
-  for (sample_index in 1:nmc) {
-    inv_C_required <- inv_C_required_store[, , sample_index]
-    mean_vec <- mean_vec_store[, sample_index]
-    vec_log_normal_density[sample_index] <- log(
-      mvtnorm::dmvnorm(
-        post_mean_omega[p, logi_which_ones], mean_vec, solve(inv_C_required)
+  
+  else {
+    for (sample_index in 1:nmc) {
+      inv_C_required <- inv_C_required_store[, , sample_index]
+      mean_vec <- mean_vec_store[, sample_index]
+      vec_log_normal_density[sample_index] <- log(
+        mvtnorm::dmvnorm(
+          post_mean_omega[p, logi_which_ones], mean_vec, solve(inv_C_required)
+        )
       )
-    )
+    }
+    MC_average_Equation_9 <- log(mean(exp(vec_log_normal_density)))
   }
+  
+  ### R code time profiling ###
+  calc_time <- proc.time() - cur_calc_time
+  g_time_env$vec_log_normal_calc_time <- (
+    g_time_env$vec_log_normal_calc_time + calc_time
+  )
+  ######################
+
   return(list(
     post_mean_omega=post_mean_omega,
-    MC_average_Equation_9=log(mean(exp(vec_log_normal_density)))
+    MC_average_Equation_9=MC_average_Equation_9
   ))
     
 }

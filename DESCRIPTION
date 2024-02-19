@@ -7,6 +7,8 @@ Author: David Rowe
 Maintainer: David Rowe <david@rowe-stats.com>
 Description: Placeholder.
 License: GPL (>= 2)
-Imports: Rcpp (>= 1.0.12)
-LinkingTo: Rcpp
+Imports:
+	Rcpp (>= 1.0.12),
+	parallel
+LinkingTo: Rcpp, RcppArmadillo
 StagedInstall: no

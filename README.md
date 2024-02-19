@@ -1,5 +1,5 @@
 # Graphical Evidence
-Rcpp package implementation for the proposed technique [1] to compute marginal likelihood in Gaussian graphical models under four different priors on the precision matirx:
+RcppArmadillo package implementation for the proposed technique [1] to compute marginal likelihood in Gaussian graphical models under four different priors on the precision matirx:
 
 1. Bayesian graphical lasso (BGL)
 
