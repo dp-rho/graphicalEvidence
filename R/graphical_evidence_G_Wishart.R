@@ -10,7 +10,8 @@ graphical_evidence_G_Wishart <- function(
   nmc,
   alpha,
   V,
-  G
+  G,
+  start_gibbs
 ) {
   
   # make all matrix arguments matrices if they are not
@@ -50,12 +51,17 @@ graphical_evidence_G_Wishart <- function(
   # Cumulative linear shifts storage
   matrix_accumulator <- matrix(0, nrow=p, ncol=p)
   
-  # This function is not high priority for C/C++ translation but ideally
-  # everything is translated eventually
-  # What is our basis for choosing prior burnin = 5 and prior nmc = 5 here ?
-  start_point_first_gibbs <- prior_sampling(
-    p, 5, 5, G, V, alpha
-  )
+  # Allow user to specify Gibbs start point if desired
+  if (is.null(start_gibbs)) {
+    # This function is not high priority for C/C++ translation but ideally
+    # everything is translated eventually
+    start_point_first_gibbs <- prior_sampling(
+      p, 5, 5, G, V, alpha
+    )
+  }
+  else {
+    start_point_first_gibbs <- start_gibbs
+  }
 
   # Main graphical evidence loop
   for (num_G_Wishart in 1:p) {
@@ -71,9 +77,15 @@ graphical_evidence_G_Wishart <- function(
       p_reduced <- ncol(reduced_data_xx)
       S_reduced <- t(reduced_data_xx) %*% reduced_data_xx
       
-      matrix_accumulator_gibbs <- matrix_accumulator[1:p_reduced, 1:p_reduced]
-      G_mat_adj_reduced <- G[1:p_reduced, 1:p_reduced]
-      scale_matrix_reduced <- V[1:p_reduced, 1:p_reduced]
+      matrix_accumulator_gibbs <- as.matrix(
+        matrix_accumulator[1:p_reduced, 1:p_reduced]
+      )
+      G_mat_adj_reduced <- as.matrix(
+        G[1:p_reduced, 1:p_reduced]
+      )
+      scale_matrix_reduced <- as.matrix(
+        V[1:p_reduced, 1:p_reduced]
+      )
       
       # Run the unrestricted sampler to get samples, which will
       # be used to approximate the Normal density in the
@@ -222,7 +234,7 @@ graphical_evidence_G_Wishart <- function(
           GIG_p <- alpha + (sum(which_ones) / 2) + 1
           log_prior_density_scalar_gamma[num_G_Wishart] <- (
             (GIG_p /2 ) * log(GIG_a / GIG_b) - log(2) -
-            log(pracma::besselK(GIG_p, sqrt(GIG_a * GIG_b))) + 
+            log(besselK(sqrt(GIG_a * GIG_b), GIG_p)) + 
             (GIG_p - 1) * log(post_mean_omega_22) - 
             0.5 * (GIG_a * post_mean_omega_22 + (GIG_b / post_mean_omega_22))
           )
@@ -234,6 +246,9 @@ graphical_evidence_G_Wishart <- function(
         log_prior_density_vector_normal[num_G_Wishart] + 
         log_prior_density_scalar_gamma[num_G_Wishart]
       )
+      if (log_prior_density[num_G_Wishart] > 100) {
+        browser()
+      }
       
       log_ratio_of_liklelihoods[num_G_Wishart] <- (
         log_data_likelihood[num_G_Wishart] + 

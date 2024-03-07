@@ -171,7 +171,7 @@ G_wishart_last_col_fixed <- function(
       
     }
     
-    if (iter < burnin) {
+    if (iter > burnin) {
       omega_save[1:p_reduced, 1:p_reduced, iter - burnin] <- (
         as.matrix(omega_reduced)
       )

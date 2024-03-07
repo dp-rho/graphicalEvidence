@@ -11,66 +11,110 @@ G_wishart_Hao_wang <- function(
   start_point_first_gibbs
 ) {
   
+  # Initialize time to calculate vec_log_normal_density
+  start_time_mcmc_hw <- proc.time()
+  
+  # Require matrix type
+  S <- as.matrix(S)
+  scale_matrix <- as.matrix(scale_matrix)
+  G_mat_adj <- as.matrix(G_mat_adj)
+  matrix_accumulator_gibbs <- as.matrix(matrix_accumulator_gibbs)
+  start_point_first_gibbs <- as.matrix(start_point_first_gibbs)
+  
   # Dimension of this iteration of Hao Wang
   p <- nrow(S)
   
+  # ##################################
+  # # RcppArmadillo implementation ###
+  # ##################################
+  
+  # RcppArmadillo implementation
+  # ans_hw <- mcmc_hw(
+  #   n, burnin, nmc, alpha, p, S, scale_matrix, G_mat_adj,
+  #   matrix_accumulator_gibbs, start_point_first_gibbs
+  # )
+  # 
+  # ### R code time profiling ###
+  # calc_time <- proc.time() - start_time_mcmc_hw
+  # g_time_env$mcmc_hw_calc_time <- (
+  #   g_time_env$mcmc_hw_calc_time + calc_time
+  # )
+  # ######################
+  # 
+  # return(list(post_mean_omega=ans_hw[[1]], MC_average_Equation_9=ans_hw[[2]]))
+
+  
+  ###################################
+  ## Native R implementation      ###
+  ###################################
+  
   # Storage for sampled omega values
   omega_save <- array(0, dim = c(p, p, nmc))
-  
+
   ind_noi_all = matrix(0, nrow=(p - 1), ncol=p)
   for (i in 1:p) {
-    
+
     # Create ith col
     if (i == 1) {
       ind_noi <- 2:p
     }
-    
+
     else if (i == p) {
       ind_noi <- 1:(p - 1)
     }
-    
+
     else {
       ind_noi <- c(1:(i - 1), (i + 1):p)
     }
-    
+
     ind_noi_all[, i] <- ind_noi
   }
-  
+
   # These three initializations below are for computing the Normal density
   # in the evaluation of the term IV_{p-j+1}
   vec_log_normal_density <- rep(0, nmc)
   G_mat_last_col <- G_mat_adj[1:(p - 1), p]
   which_ones <- as.integer(G_mat_last_col == 1)
   logi_which_ones <- which(which_ones == 1)
-  
-  if (sum(which_ones) >= 1) {
-    inv_C_required_store <- array(
-      0, dim=c(sum(which_ones), sum(which_ones), nmc)
-    )
-    mean_vec_store <- matrix(0, nrow=sum(which_ones), ncol=nmc)
-  }
-  
+
+  inv_C_required_store <- array(
+    0, dim=c(sum(which_ones), sum(which_ones), nmc)
+  )
+  mean_vec_store <- matrix(0, nrow=sum(which_ones), ncol=nmc)
+
+
   # Set initial value of Omega
   Omega <- start_point_first_gibbs
   
-  
+  # Save random sampled values to export to C++ for validation
+  # gamma_vals <- numeric((burnin + nmc) * p)
+  # gamma_index <- 1
+  # norm_vals <- c((burnin + nmc) * p^2)
+  # norm_index <- 1
+
   # Start sampling
   for (iter in 1:(burnin + nmc)) {
-    
+
     # Gibbs sampler with with Hao-Wang's decomposition
     for (i in 1:p) {
       V_mat_22 <- scale_matrix[i, i]
       ind_noi <- ind_noi_all[, i]
       V_mat_12 <- scale_matrix[ind_noi, i]
-      
+
       S_21 <- S[ind_noi, i]
       S_22 <- S[i, i]
       vec_accumulator_21 <- -1 * matrix_accumulator_gibbs[ind_noi, i]
-      
+
       # Sample gamma and beta
       gamma_sample <- rgamma(
         1, alpha + (n / 2) + 1, scale=(2 / (S_22 + V_mat_22))
       )
+      
+      # Saving random samples for replication in compiled code
+      # gamma_vals[gamma_index] <- gamma_sample
+      # gamma_index <- gamma_index + 1
+      ####
+
       inv_Omega_11 <- solve(Omega[ind_noi, ind_noi])
       inv_C <- (S_22 + V_mat_22) * inv_Omega_11
 
@@ -79,19 +123,19 @@ G_wishart_Hao_wang <- function(
       which_ones <- as.integer(G_mat_current_col == 1)
       logi_which_ones <- which(which_ones == 1)
       logi_which_zeros <- which(G_mat_current_col == 0)
-      
+
       if (sum(which_ones) >= 1) {
         inv_C_required <- inv_C[logi_which_ones, logi_which_ones]
         inv_C_chol_required <- chol(inv_C_required)
-        
+
         V_mat_12_required <- V_mat_12[logi_which_ones]
         S_21_required <- S_21[logi_which_ones]
-        
+
         if (length(logi_which_zeros)) {
-          
+
           vec_accumulator_21_required <- vec_accumulator_21[logi_which_zeros]
           inv_C_not_required <- inv_C[logi_which_zeros, logi_which_ones]
-          
+
           vec_accumulator_21_required_mod <- t(
             t(vec_accumulator_21_required) %*% inv_C_not_required
           )
@@ -100,36 +144,35 @@ G_wishart_Hao_wang <- function(
             inv_C_required,
             V_mat_12_required + S_21_required + vec_accumulator_21_required_mod
           )
-          
-          if ((iter > burnin) & (i == p)) {
-            inv_C_required_store[, , iter - burnin] <- inv_C_required
-            mean_vec_store[, iter - burnin] <- mu_i_reduced
-          }
-          
-          beta_reduced <- mu_i_reduced + (
-            solve(inv_C_chol_required, rnorm(sum(which_ones)))
-          )
+
         }
         else {
-          
+
           mu_i_reduced <- -solve(
             inv_C_required, V_mat_12_required + S_21_required
           )
-          
-          if ((iter > burnin) & (i == p)) {
-            inv_C_required_store[, , iter - burnin] <- inv_C_required
-            mean_vec_store[, iter - burnin] <- mu_i_reduced
-          }
-          
-          beta_reduced <- mu_i_reduced + (
-            solve(inv_C_chol_required, rnorm(sum(which_ones)))
-          )
+        }
+
+        if ((iter > burnin) & (i == p)) {
+          inv_C_required_store[, , iter - burnin] <- inv_C_required
+          mean_vec_store[, iter - burnin] <- mu_i_reduced
         }
         
+        rnorm_sample <- rnorm(sum(which_ones))
+          
+        # Saving random samples for replication in compiled code
+        # norm_vals[norm_index:(norm_index + length(rnorm_sample) - 1)] <- rnorm_sample
+        # norm_index <- norm_index + length(rnorm_sample)
+        ####
+
+        beta_reduced <- mu_i_reduced + (
+          solve(inv_C_chol_required, rnorm_sample)
+        )
+
         beta <- matrix(0, nrow=(p - 1), ncol=1)
-        
+
         beta[logi_which_ones, 1] <- beta_reduced
-        
+
         if (!(sum(which_ones) == (p - 1))) {
           beta[logi_which_zeros, 1] <- vec_accumulator_21_required
         }
@@ -140,43 +183,40 @@ G_wishart_Hao_wang <- function(
 
       omega_12 <- beta
       omega_22 <- gamma_sample + (t(beta) %*% inv_Omega_11 %*% beta)
-      
+
       # Update omega
       Omega[i, ind_noi] <- omega_12
       Omega[ind_noi, i] <- omega_12
       Omega[i, i] <- omega_22
     }
-    
+
     if (iter > burnin) {
       omega_save[, , iter - burnin] <- as.matrix(Omega)
     }
-    
+
   }
-  
+
   # Take accumulated mean of Omega from last nmc iterations
   post_mean_omega <- apply(omega_save, c(1, 2), mean)
   
   # Initialize time to calculate vec_log_normal_density
-  cur_calc_time <- proc.time()
+  start_time_vec <- proc.time()
+  
+  # Check 1's in the last column
+  G_mat_last_col <- G_mat_adj[1:(p - 1), p]
+  which_ones <- as.integer(G_mat_last_col == 1)
   
   ###################################
   ## RcppArmadillo implementation ###
   ###################################
   
   # RcppArmadillo implementation
-  ans_ls <-calc_eq_9(
-    which_ones, logi_which_ones, post_mean_omega, inv_C_required_store,
-    mean_vec_store, p, nmc
-  )
-
-  ### R code time profiling ###
-  calc_time <- proc.time() - cur_calc_time
-  g_time_env$vec_log_normal_calc_time <- (
-    g_time_env$vec_log_normal_calc_time + calc_time
-  )
-  ######################
-
-  return(list(post_mean_omega=ans_ls[[1]], MC_average_Equation_9=ans_ls[[2]]))
+  # ans_ls <- calc_eq_9(
+  #   which_ones, post_mean_omega, inv_C_required_store,
+  #   mean_vec_store, p, nmc
+  # )
+  # 
+  # return(list(post_mean_omega=ans_ls[[1]], MC_average_Equation_9=ans_ls[[2]]))
 
   ###################################
   ## Native R implementation      ###
@@ -187,7 +227,6 @@ G_wishart_Hao_wang <- function(
   if (!sum(which_ones)){
     MC_average_Equation_9 <- 0
   }
-  
   else {
     for (sample_index in 1:nmc) {
       inv_C_required <- inv_C_required_store[, , sample_index]
@@ -202,9 +241,13 @@ G_wishart_Hao_wang <- function(
   }
   
   ### R code time profiling ###
-  calc_time <- proc.time() - cur_calc_time
+  calc_time <- proc.time() - start_time_vec
   g_time_env$vec_log_normal_calc_time <- (
     g_time_env$vec_log_normal_calc_time + calc_time
+  )
+  calc_time <- proc.time() - start_time_mcmc_hw
+  g_time_env$mcmc_hw_calc_time <- (
+    g_time_env$mcmc_hw_calc_time + calc_time
   )
   ######################
 
@@ -212,5 +255,4 @@ G_wishart_Hao_wang <- function(
     post_mean_omega=post_mean_omega,
     MC_average_Equation_9=MC_average_Equation_9
   ))
-    
 }

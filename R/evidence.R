@@ -13,8 +13,8 @@ evidence <- function(
   alpha = NULL,
   lambda = NULL,
   V = NULL,
-  G = NULL
-  # Do we need banded_param for this function?
+  G = NULL,
+  start_gibbs = NULL
 ) {
   
   # Match arg on prior name
@@ -34,7 +34,7 @@ evidence <- function(
     
     # First place to start work
     'G_Wishart' = graphical_evidence_G_Wishart(
-      xx, S, n, p, burnin, nmc, alpha, V, G
+      xx, S, n, p, burnin, nmc, alpha, V, G, start_gibbs
     )
   )
   

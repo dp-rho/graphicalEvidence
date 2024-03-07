@@ -12,11 +12,11 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // print_times
-void print_times(int nruns);
+void print_times(const int nruns);
 RcppExport SEXP _graphicalEvidence_print_times(SEXP nrunsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type nruns(nrunsSEXP);
+    Rcpp::traits::input_parameter< const int >::type nruns(nrunsSEXP);
     print_times(nruns);
     return R_NilValue;
 END_RCPP
@@ -30,20 +30,34 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// calc_eq_9
-List calc_eq_9(NumericVector ones_vec, NumericVector one_indices, NumericVector post_mean_omega, NumericVector inv_sigma_stores, NumericVector mean_vecs, int p, int nmc);
-RcppExport SEXP _graphicalEvidence_calc_eq_9(SEXP ones_vecSEXP, SEXP one_indicesSEXP, SEXP post_mean_omegaSEXP, SEXP inv_sigma_storesSEXP, SEXP mean_vecsSEXP, SEXP pSEXP, SEXP nmcSEXP) {
+// bind_random_samples
+void bind_random_samples(NumericVector rgammas, NumericVector rnorms);
+RcppExport SEXP _graphicalEvidence_bind_random_samples(SEXP rgammasSEXP, SEXP rnormsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type rgammas(rgammasSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rnorms(rnormsSEXP);
+    bind_random_samples(rgammas, rnorms);
+    return R_NilValue;
+END_RCPP
+}
+// mcmc_hw
+List mcmc_hw(int n, int burnin, int nmc, int alpha, int p, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector init_gibbs_nvec);
+RcppExport SEXP _graphicalEvidence_mcmc_hw(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP s_mat_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP g_mat_adj_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP init_gibbs_nvecSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type ones_vec(ones_vecSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type one_indices(one_indicesSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type post_mean_omega(post_mean_omegaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type inv_sigma_stores(inv_sigma_storesSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type mean_vecs(mean_vecsSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
     Rcpp::traits::input_parameter< int >::type nmc(nmcSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_eq_9(ones_vec, one_indices, post_mean_omega, inv_sigma_stores, mean_vecs, p, nmc));
+    Rcpp::traits::input_parameter< int >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scale_mat_nvec(scale_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type g_mat_adj_nvec(g_mat_adj_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type init_gibbs_nvec(init_gibbs_nvecSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcmc_hw(n, burnin, nmc, alpha, p, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, init_gibbs_nvec));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -57,12 +71,24 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// set_seed
+void set_seed(unsigned int seed);
+RcppExport SEXP _graphicalEvidence_set_seed(SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned int >::type seed(seedSEXP);
+    set_seed(seed);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_print_times", (DL_FUNC) &_graphicalEvidence_print_times, 1},
     {"_graphicalEvidence_reset_times", (DL_FUNC) &_graphicalEvidence_reset_times, 0},
-    {"_graphicalEvidence_calc_eq_9", (DL_FUNC) &_graphicalEvidence_calc_eq_9, 7},
+    {"_graphicalEvidence_bind_random_samples", (DL_FUNC) &_graphicalEvidence_bind_random_samples, 2},
+    {"_graphicalEvidence_mcmc_hw", (DL_FUNC) &_graphicalEvidence_mcmc_hw, 10},
     {"_graphicalEvidence_set_cores", (DL_FUNC) &_graphicalEvidence_set_cores, 1},
+    {"_graphicalEvidence_set_seed", (DL_FUNC) &_graphicalEvidence_set_seed, 1},
     {NULL, NULL, 0}
 };
 
