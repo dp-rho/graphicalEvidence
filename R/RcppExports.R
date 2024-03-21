@@ -9,12 +9,20 @@ reset_times <- function() {
     invisible(.Call(`_graphicalEvidence_reset_times`))
 }
 
+calc_eq_11 <- function(omega_22_mean, s_22, scale_mat_22, alpha, n, nmc, gamma_vec) {
+    .Call(`_graphicalEvidence_calc_eq_11`, omega_22_mean, s_22, scale_mat_22, alpha, n, nmc, gamma_vec)
+}
+
 bind_random_samples <- function(rgammas, rnorms) {
     invisible(.Call(`_graphicalEvidence_bind_random_samples`, rgammas, rnorms))
 }
 
 mcmc_hw <- function(n, burnin, nmc, alpha, p, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, init_gibbs_nvec) {
     .Call(`_graphicalEvidence_mcmc_hw`, n, burnin, nmc, alpha, p, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, init_gibbs_nvec)
+}
+
+mcmc_last_col <- function(n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec) {
+    .Call(`_graphicalEvidence_mcmc_last_col`, n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec)
 }
 
 set_cores <- function(cores) {

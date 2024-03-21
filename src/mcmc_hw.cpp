@@ -8,7 +8,7 @@
  * Currently communicates with R through Rcpp interface, will
  * eventually communicate only with other compiled code
  */
- // [[Rcpp::export]]
+// [[Rcpp::export]]
 List mcmc_hw(
   int n,
   int burnin,
@@ -49,7 +49,7 @@ List mcmc_hw(
   /* Allocate working memory in top level scope */
   arma::mat inv_omega_11 = arma::zeros(p - 1, p - 1);
   arma::mat inv_c = arma::zeros(p - 1, p - 1);
-  arma::vec beta((p - 1), arma::fill::zeros);
+  arma::vec beta = arma::zeros(p - 1);
 
   /* Iterate burnin + nmc times and save results past burnin  */
   arma::uword total_iters = static_cast<arma::uword>(burnin + nmc);
@@ -65,10 +65,12 @@ List mcmc_hw(
   omega_save /= nmc;
 
   /* Calcluate mc average equation 9 and return post mean omega as well */
-  List z = calc_eq_9(
+  double mc_avg_eq_9 = calc_eq_9(
     find_which_ones[p - 1], inv_c_required_store, mean_vec_store,
     omega_save, xdim, p, nmc
   );
+
+  List z = List::create(Rcpp::wrap(omega_save), mc_avg_eq_9);
 
   /* Time profiling */
   g_mcmc_hw_timer.TimerEnd();

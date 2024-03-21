@@ -14,10 +14,11 @@
 #include <iostream>
 #include <chrono>
 #include <random>
+#include <cmath>
 #include "FunctionTimer.h"
 #include "GammaSampler.h"
 #include "prototypes.h"
-#include "log_dmvnrm_arma_vec.h"
+#include "looping_dmvnrm_arma.h"
 #include "inject_random.h"
 
 using namespace Rcpp;

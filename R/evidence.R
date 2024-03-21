@@ -20,6 +20,10 @@ evidence <- function(
   # Match arg on prior name
   prior_name <- match.arg(prior_name)
   
+  # Detect available cores and assign to compiled program
+  num_cores <- parallel::detectCores()
+  set_cores(num_cores)
+  
   result <- switch(
     prior_name,
     

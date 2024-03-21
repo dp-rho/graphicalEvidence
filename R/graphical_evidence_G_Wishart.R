@@ -20,11 +20,7 @@ graphical_evidence_G_Wishart <- function(
   V <- as.matrix(V)
   G <- as.matrix(G)
   
-  # Detect available cores and assign to compiled program
-  num_cores <- parallel::detectCores()
-  set_cores(num_cores)
-  
-  # Call to Rcpp function should be here, might cut out banded inputs:
+  # Call to Rcpp function should be here:
   # compiled_G_Wishart(
   #   xx, S, n, p, burnin, nmc, alpha, G, V
   # )

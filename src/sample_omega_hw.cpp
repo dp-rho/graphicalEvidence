@@ -78,10 +78,9 @@ void sample_omega_hw(
         mean_vec_store.col((iter - burnin)) = mu_reduced;
       }
 
-      arma::vec rnorm_vec = arma::randn<arma::vec>(reduced_dim);
       mu_reduced += arma::solve(
         arma::chol(inv_c.submat(find_which_ones[i], find_which_ones[i])), 
-        rnorm_vec
+        arma::randn<arma::vec>(reduced_dim)
       );
 
       beta.elem(find_which_ones[i]) = mu_reduced;
@@ -90,7 +89,7 @@ void sample_omega_hw(
     /* Update ith col and row of omega */
     omega.submat(arma::uvec({i}), ind_noi_mat.col(i)) = beta.t();
     omega.submat(ind_noi_mat.col(i), arma::uvec({i})) = beta;
-    omega.row(i).col(i) = gamma_sample + arma::dot(beta.t() * inv_omega_11, beta);
+    omega.at(i, i) = gamma_sample + arma::dot(beta.t() * inv_omega_11, beta);
   }
 
   /* If iteration is past burnin period, accumulate Omega */

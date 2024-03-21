@@ -34,3 +34,5 @@ private:
 /* Global timer variables */
 extern FunctionTimer g_eq_9_timer;
 extern FunctionTimer g_mcmc_hw_timer;
+extern FunctionTimer g_eq_11_timer;
+extern FunctionTimer g_mcmc_last_col_timer;

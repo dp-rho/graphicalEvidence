@@ -30,6 +30,23 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// calc_eq_11
+double calc_eq_11(const double omega_22_mean, const double s_22, const double scale_mat_22, const double alpha, const unsigned int n, const unsigned int nmc, NumericVector gamma_vec);
+RcppExport SEXP _graphicalEvidence_calc_eq_11(SEXP omega_22_meanSEXP, SEXP s_22SEXP, SEXP scale_mat_22SEXP, SEXP alphaSEXP, SEXP nSEXP, SEXP nmcSEXP, SEXP gamma_vecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type omega_22_mean(omega_22_meanSEXP);
+    Rcpp::traits::input_parameter< const double >::type s_22(s_22SEXP);
+    Rcpp::traits::input_parameter< const double >::type scale_mat_22(scale_mat_22SEXP);
+    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type nmc(nmcSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gamma_vec(gamma_vecSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_eq_11(omega_22_mean, s_22, scale_mat_22, alpha, n, nmc, gamma_vec));
+    return rcpp_result_gen;
+END_RCPP
+}
 // bind_random_samples
 void bind_random_samples(NumericVector rgammas, NumericVector rnorms);
 RcppExport SEXP _graphicalEvidence_bind_random_samples(SEXP rgammasSEXP, SEXP rnormsSEXP) {
@@ -61,6 +78,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mcmc_last_col
+List mcmc_last_col(const unsigned int n, const unsigned int burnin, const unsigned int nmc, const unsigned int alpha, const unsigned int p, NumericVector fixed_last_col_nvec, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector post_mean_omega_nvec);
+RcppExport SEXP _graphicalEvidence_mcmc_last_col(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP fixed_last_col_nvecSEXP, SEXP s_mat_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP g_mat_adj_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP post_mean_omega_nvecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type nmc(nmcSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type fixed_last_col_nvec(fixed_last_col_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scale_mat_nvec(scale_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type g_mat_adj_nvec(g_mat_adj_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type post_mean_omega_nvec(post_mean_omega_nvecSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcmc_last_col(n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec));
+    return rcpp_result_gen;
+END_RCPP
+}
 // set_cores
 void set_cores(const int cores);
 RcppExport SEXP _graphicalEvidence_set_cores(SEXP coresSEXP) {
@@ -85,8 +123,10 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_print_times", (DL_FUNC) &_graphicalEvidence_print_times, 1},
     {"_graphicalEvidence_reset_times", (DL_FUNC) &_graphicalEvidence_reset_times, 0},
+    {"_graphicalEvidence_calc_eq_11", (DL_FUNC) &_graphicalEvidence_calc_eq_11, 7},
     {"_graphicalEvidence_bind_random_samples", (DL_FUNC) &_graphicalEvidence_bind_random_samples, 2},
     {"_graphicalEvidence_mcmc_hw", (DL_FUNC) &_graphicalEvidence_mcmc_hw, 10},
+    {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},
     {"_graphicalEvidence_set_cores", (DL_FUNC) &_graphicalEvidence_set_cores, 1},
     {"_graphicalEvidence_set_seed", (DL_FUNC) &_graphicalEvidence_set_seed, 1},
     {NULL, NULL, 0}

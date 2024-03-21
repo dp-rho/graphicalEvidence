@@ -11,7 +11,7 @@ G_wishart_Hao_wang <- function(
   start_point_first_gibbs
 ) {
   
-  # Initialize time to calculate vec_log_normal_density
+  # Initialize time to calculate Hao Wang sampler
   start_time_mcmc_hw <- proc.time()
   
   # Require matrix type
@@ -29,19 +29,19 @@ G_wishart_Hao_wang <- function(
   # ##################################
   
   # RcppArmadillo implementation
-  # ans_hw <- mcmc_hw(
-  #   n, burnin, nmc, alpha, p, S, scale_matrix, G_mat_adj,
-  #   matrix_accumulator_gibbs, start_point_first_gibbs
-  # )
-  # 
-  # ### R code time profiling ###
-  # calc_time <- proc.time() - start_time_mcmc_hw
-  # g_time_env$mcmc_hw_calc_time <- (
-  #   g_time_env$mcmc_hw_calc_time + calc_time
-  # )
-  # ######################
-  # 
-  # return(list(post_mean_omega=ans_hw[[1]], MC_average_Equation_9=ans_hw[[2]]))
+  ans_hw <- mcmc_hw(
+    n, burnin, nmc, alpha, p, S, scale_matrix, G_mat_adj,
+    matrix_accumulator_gibbs, start_point_first_gibbs
+  )
+
+  ### R code time profiling ###
+  calc_time <- proc.time() - start_time_mcmc_hw
+  g_time_env$mcmc_hw_calc_time <- (
+    g_time_env$mcmc_hw_calc_time + calc_time
+  )
+  ######################
+
+  return(list(post_mean_omega=ans_hw[[1]], MC_average_Equation_9=ans_hw[[2]]))
 
   
   ###################################

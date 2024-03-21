@@ -7,7 +7,7 @@
  * Adapted from RcppArmadillo docs
  */
 
-arma::vec log_dmvnrm_arma_vec(
+double looping_dmvnrm_arma(
   arma::rowvec const& x,
   arma::mat const& mean_vecs,
   arma::cube const& inv_sigma_stores
@@ -48,7 +48,7 @@ arma::vec log_dmvnrm_arma_vec(
     }
   }
 
-  return out;
+  return log(arma::mean(exp(out)));
 }
 
 
