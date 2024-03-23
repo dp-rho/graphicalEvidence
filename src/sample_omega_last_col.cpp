@@ -38,9 +38,8 @@ void sample_omega_last_col(
     ind_noi_data1 = -(1 / omega_pp) * last_col_outer.submat(
       ind_noi_mat.col(i), arma::uvec({i})
     );
-    ind_noi_data2 = gibbs_mat.submat(ind_noi_mat.col(i), arma::uvec({i}));
+    ind_noi_data2 = -1 * gibbs_mat.submat(ind_noi_mat.col(i), arma::uvec({i}));
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[i]);
-    // double gamma_sample = extract_rgamma();
 
     /* Update inv_c */
     inv_c = arma::inv(
@@ -53,9 +52,7 @@ void sample_omega_last_col(
       inv_c_required = inv_c.submat(find_which_ones[i], find_which_ones[i]);
 
       if (find_which_zeros[i].n_elem) {
-
-        /* Update zero indices in beta  */
-        beta.elem(find_which_zeros[i]) = -1 * (
+        beta.elem(find_which_zeros[i]) = (
           ind_noi_data1.elem(find_which_zeros[i]) +
           ind_noi_data2.elem(find_which_zeros[i])
         );
@@ -79,8 +76,6 @@ void sample_omega_last_col(
         );
       }
       else {
-        //arma::vec rnorm_vec = arma::zeros(reduced_dim);
-        //extract_rnorm(rnorm_vec.memptr(), reduced_dim);
         reduced_vec = -solve(
           inv_c_required,
           arma::randn<arma::vec>(reduced_dim)
@@ -88,8 +83,6 @@ void sample_omega_last_col(
       }
       
       /* Update beta at indices associated with 1's */
-      //arma::vec rnorm_vec = arma::zeros(reduced_dim);
-      //extract_rnorm(rnorm_vec.memptr(), reduced_dim);
       reduced_vec += arma::solve(
         arma::chol(inv_c_required), arma::randn<arma::vec>(reduced_dim)
       );

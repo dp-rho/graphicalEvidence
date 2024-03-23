@@ -20,19 +20,19 @@ G_wishart_last_col_fixed <- function(
   G_mat_adj_copy <- G_mat_adj
   matrix_accumulator_gibbs_copy <- matrix_accumulator_gibbs
   
-  # gamma_subtractors <- numeric(nmc)
-  # omega_reduced_acc <- matrix(0, nrow=(p - 1), ncol=(p - 1))
-  # omega_22_acc <- 0
-  # 
-  # p_reduced <- p - 1
-  # S_reduced <- as.matrix(S[1:p_reduced, 1:p_reduced])
-  # 
-  # matrix_accumulator_gibbs <- as.matrix(
-  #   matrix_accumulator_gibbs[1:p_reduced, 1:p_reduced]
-  # )
-  # scale_matrix_required <- as.matrix(scale_matrix[1:p_reduced, 1:p_reduced])
-  # G_mat_adj <- as.matrix(G_mat_adj[1:p_reduced, 1:p_reduced])
-  # 
+  gamma_subtractors <- numeric(nmc)
+  omega_reduced_acc <- matrix(0, nrow=(p - 1), ncol=(p - 1))
+  omega_22_acc <- 0
+
+  p_reduced <- p - 1
+  S_reduced <- as.matrix(S[1:p_reduced, 1:p_reduced])
+
+  matrix_accumulator_gibbs <- as.matrix(
+    matrix_accumulator_gibbs[1:p_reduced, 1:p_reduced]
+  )
+  scale_matrix_required <- as.matrix(scale_matrix[1:p_reduced, 1:p_reduced])
+  G_mat_adj <- as.matrix(G_mat_adj[1:p_reduced, 1:p_reduced])
+
   # if (p_reduced != 1) {
   #   ind_noi_all <- matrix(0, nrow=(p_reduced - 1), ncol=p_reduced)
   #   for (i in 1:p_reduced) {
@@ -52,10 +52,10 @@ G_wishart_last_col_fixed <- function(
   # omega_reduced <- post_mean_omega[1:p_reduced, 1:p_reduced]
   # 
   # # Save random sampled values to export to C++ for validation
-  # # gamma_vals <- numeric((burnin + nmc) * p)
-  # # gamma_index <- 1
-  # # norm_vals <- c((burnin + nmc) * p^2)
-  # # norm_index <- 1
+  # gamma_vals <- numeric((burnin + nmc) * p)
+  # gamma_index <- 1
+  # norm_vals <- c((burnin + nmc) * p^2)
+  # norm_index <- 1
   # 
   # # Start MCMC sampling
   # for (iter in 1:(burnin + nmc)) {
@@ -72,8 +72,8 @@ G_wishart_last_col_fixed <- function(
   #   )[1]
   # 
   #   # Saving random samples for replication in compiled code
-  #   # gamma_vals[gamma_index] <- gamma_sample
-  #   # gamma_index <- gamma_index + 1
+  #   gamma_vals[gamma_index] <- gamma_sample
+  #   gamma_index <- gamma_index + 1
   #   #####
   # 
   #   if (p_reduced != 1) {
@@ -102,8 +102,8 @@ G_wishart_last_col_fixed <- function(
   #         1, alpha + (n / 2) + 1, scale=(2 / (s_22_tilde + V_mat_22))
   #       )
   #       # Saving random samples for replication in compiled code
-  #       # gamma_vals[gamma_index] <- gamma_sample
-  #       # gamma_index <- gamma_index + 1
+  #       gamma_vals[gamma_index] <- gamma_sample
+  #       gamma_index <- gamma_index + 1
   #       #####
   # 
   #       tilde_w_11 <- omega_reduced_tilde[ind_noi, ind_noi]
@@ -125,6 +125,7 @@ G_wishart_last_col_fixed <- function(
   #         s_21_tilde_required <- s_21_tilde[logi_which_ones]
   # 
   #         if (sum(which_zeros) >= 1) {
+  #           print("has zeros")
   #           vec_accumulator_21_required <- vec_accumulator_21[logi_which_zeros]
   #           inv_C_not_required <- inv_C[logi_which_zeros, logi_which_ones]
   # 
@@ -147,6 +148,15 @@ G_wishart_last_col_fixed <- function(
   #           # print(V_mat_12_required + s_21_tilde_required +
   #           #         vec_accumulator_21_required_mod +
   #           #         temp_vec_accumulator_21_required_mod)
+  #           
+  #           print("solving for comp 1: ")
+  #           print(V_mat_12_required)
+  #           print("solving for comp 2: ")
+  #           print(s_21_tilde_required)
+  #           print("solving for comp 3: ")
+  #           print(vec_accumulator_21_required_mod)
+  #           print("solving for comp 4: ")
+  #           print(temp_vec_accumulator_21_required_mod)
   # 
   #           mu_i_reduced <- -solve(
   #             inv_C_required,
@@ -158,18 +168,25 @@ G_wishart_last_col_fixed <- function(
   #         else {
   #           rnorm_sample <- rnorm(sum(which_ones))
   #           # Saving random samples for replication in compiled code
-  #           # norm_vals[norm_index:(norm_index + length(rnorm_sample) - 1)] <- rnorm_sample
-  #           # norm_index <- norm_index + length(rnorm_sample)
+  #           norm_vals[norm_index:(norm_index + length(rnorm_sample) - 1)] <- rnorm_sample
+  #           norm_index <- norm_index + length(rnorm_sample)
   #           ####
   #           mu_i_reduced <- -solve(inv_C_required, rnorm_sample)
   #         }
   # 
   #         rnorm_sample <- rnorm(sum(which_ones))
   #         # Saving random samples for replication in compiled code
-  #         # norm_vals[norm_index:(norm_index + length(rnorm_sample) - 1)] <- rnorm_sample
-  #         # norm_index <- norm_index + length(rnorm_sample)
+  #         norm_vals[norm_index:(norm_index + length(rnorm_sample) - 1)] <- rnorm_sample
+  #         norm_index <- norm_index + length(rnorm_sample)
   #         ####
-  # 
+  #         print("mu reduced")
+  #         print(mu_i_reduced)
+  #         print("inv c")
+  #         print(inv_C_required)
+  #         print("chol inv c")
+  #         print(inv_C_chol_required)
+  #         print("RNORM SAMPLE:")
+  #         print(rnorm_sample)
   #         beta_reduced <- mu_i_reduced + (
   #           solve(inv_C_chol_required, rnorm_sample)
   #         )
@@ -187,6 +204,9 @@ G_wishart_last_col_fixed <- function(
   #         beta <- vec_accumulator_21 + temp_vec_accumulator_21
   #       }
   # 
+  #       cat(paste0("R beta ", i, ":\n"))
+  #       print(beta)
+  #       
   #       omega_12 <- beta
   #       omega_22 <- gamma_sample + (
   #         t(beta) %*% inv_omega_11 %*% beta
@@ -200,14 +220,15 @@ G_wishart_last_col_fixed <- function(
   #     omega_reduced <- omega_reduced_tilde + (
   #       (1 / omega_pp) * (fixed_last_col %*% t(fixed_last_col))
   #     )
+  #     
   #   }
   #   else {
   #     s_22 <- S_reduced[1, 1]
   #     V_mat_22 <- scale_matrix_required[1, 1]
   #     gamma_sample <- rgamma(1, alpha + (n / 2) + 1, scale=(2 / (s_22 + V_mat_22)))
   #     # Saving random samples for replication in compiled code
-  #     # gamma_vals[gamma_index] <- gamma_sample
-  #     # gamma_index <- gamma_index + 1
+  #     gamma_vals[gamma_index] <- gamma_sample
+  #     gamma_index <- gamma_index + 1
   #     #####
   # 
   #     # print("ELSE")
@@ -239,15 +260,16 @@ G_wishart_last_col_fixed <- function(
   # 
   # omega_22_acc <- omega_22_acc / nmc
   # start_point_first_gibbs <- omega_reduced_acc / nmc
-  
-  # print("R ANS")
-  # print(gamma_subtractors)
-  # print(start_point_first_gibbs)
-  # print(omega_22_acc)
-  
-  # vec_gamma_density <- rep(-Inf, nmc)
-  
+  # 
+  # # print("R ANS")
+  # # print(gamma_subtractors)
+  # # print(start_point_first_gibbs)
+  # # print(omega_22_acc)
+  # 
+  # # vec_gamma_density <- rep(-Inf, nmc)
+  # 
   # bind_random_samples(gamma_vals, norm_vals)
+  
   ##################################
   # RcppArmadillo implementation ###
   ##################################
@@ -257,9 +279,9 @@ G_wishart_last_col_fixed <- function(
     n, burnin, nmc, alpha, p, fixed_last_col, S, scale_matrix, G_mat_adj_copy,
     matrix_accumulator_gibbs_copy, post_mean_omega
   )
-  
+
   # print(ans_last_col)
-  
+
   compiled_gamma_subtractors <- ans_last_col[[1]]
   compiled_omega_reduced_acc <- ans_last_col[[2]]
   compiled_omega_22_acc <- ans_last_col[[3]]
@@ -273,14 +295,13 @@ G_wishart_last_col_fixed <- function(
   ###################################
   ## RcppArmadillo implementation ###
   ###################################
-  
+
   # RcppArmadillo implementation
   MC_average_Equation_11 <- calc_eq_11(
     compiled_omega_22_acc, S[p, p], scale_matrix[p, p], alpha, # compiled_omega_22_acc
     n, nmc, compiled_gamma_subtractors # compiled_gamma_subtractors
   )
 
-  
   ###################################
   ## Native R implementation      ###
   ###################################

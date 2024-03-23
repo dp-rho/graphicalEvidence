@@ -88,21 +88,16 @@ List mcmc_last_col(
         ind_noi_data1, ind_noi_data2, find_which_ones, find_which_zeros,
         ind_noi_mat, s_mat, scale_mat, gibbs_mat, last_col_outer
       );
+
     }
 
     /* In special case where the matrices considered are single elements  */
     /* the sampling process is highly simplified                          */
     else {
       gamma_sample = g_rgamma.GetSample(shape_param, scale_params[0]);
-      // gamma_sample = extract_rgamma();
-      //printf("Else case\n");
-      //arma::cout << "fixed last col\n" << fixed_last_col << arma::endl;
-      //arma::cout << "omega pre\n" << omega << arma::endl;
       omega.at(0, 0) = gamma_sample + (
         fixed_last_col[0] * fixed_last_col[0] / omega_22
       );
-      //arma::cout << "gamma sample: " << gamma_sample << arma::endl;
-      //arma::cout << "omega reduced post\n" << omega << arma::endl;
     }
 
     /* Save results if burnin is complete */

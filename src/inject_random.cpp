@@ -23,10 +23,12 @@ void bind_random_samples(
   g_rnorm_index = 0;
 
   /* Bind gamma random variales */
+  if (g_rgamma_vec) free(g_rgamma_vec);
   g_rgamma_vec = (double*) malloc(sizeof(double) * rgammas.size());
   memcpy(g_rgamma_vec, rgammas.begin(), sizeof(double) * rgammas.size());
 
   /* Bind normal random variables */
+  if (g_rnorm_vec) free(g_rnorm_vec);
   g_rnorm_vec = (double*) malloc(sizeof(double) * rnorms.size());
   memcpy(g_rnorm_vec, rnorms.begin(), sizeof(double) * rnorms.size());
 }
