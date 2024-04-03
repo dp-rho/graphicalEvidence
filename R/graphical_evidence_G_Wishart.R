@@ -63,7 +63,7 @@ graphical_evidence_G_Wishart <- function(
   for (num_G_Wishart in 1:p) {
     
     if (num_G_Wishart <= (p - 1)) {
-      cat(paste0(num_G_Wishart, ' th num_G_Wishart\n'))
+      # cat(paste0(num_G_Wishart, ' th num_G_Wishart\n'))
       
       # for every iteration we need smaller and smaller blocks of
       # the data matrix xx. When num_G_Wishart = 1, we need the entire
@@ -242,9 +242,6 @@ graphical_evidence_G_Wishart <- function(
         log_prior_density_vector_normal[num_G_Wishart] + 
         log_prior_density_scalar_gamma[num_G_Wishart]
       )
-      if (log_prior_density[num_G_Wishart] > 100) {
-        browser()
-      }
       
       log_ratio_of_liklelihoods[num_G_Wishart] <- (
         log_data_likelihood[num_G_Wishart] + 

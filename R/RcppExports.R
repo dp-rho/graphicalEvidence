@@ -9,10 +9,6 @@ reset_times <- function() {
     invisible(.Call(`_graphicalEvidence_reset_times`))
 }
 
-calc_eq_11 <- function(omega_22_mean, s_22, scale_mat_22, alpha, n, nmc, gamma_vec) {
-    .Call(`_graphicalEvidence_calc_eq_11`, omega_22_mean, s_22, scale_mat_22, alpha, n, nmc, gamma_vec)
-}
-
 bind_random_samples <- function(rgammas, rnorms) {
     invisible(.Call(`_graphicalEvidence_bind_random_samples`, rgammas, rnorms))
 }

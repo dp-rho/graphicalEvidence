@@ -34,6 +34,11 @@ arma::vec solve_mu_reduced_hw(
   arma::mat const&, arma::rowvec&, arma::vec&
 );
 
+void solve_mu_reduced_hw_in_place(
+  const unsigned int, arma::uvec const&, arma::uvec const&,
+  arma::mat const&, arma::rowvec const&
+);
+
 /* Functions in sample_omega_hw.cpp */
 void sample_omega_hw(
   const int, const int, const int, const int, arma::vec&,
@@ -56,4 +61,9 @@ void sample_omega_last_col(
   std::vector<arma::uvec> const&, std::vector<arma::uvec> const&,
   arma::umat const&, arma::mat const&, arma::mat const&, arma::mat const&,
   arma::mat const&
+);
+
+double calc_eq_11(
+  const double, const double, const double, const double,
+  const unsigned int, const unsigned int, arma::vec const&
 );

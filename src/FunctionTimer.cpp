@@ -5,6 +5,12 @@ FunctionTimer g_eq_9_timer("mc_avg_eq_9");
 FunctionTimer g_mcmc_hw_timer("mcmc_hw");
 FunctionTimer g_eq_11_timer("mc_avg_eq_11");
 FunctionTimer g_mcmc_last_col_timer("mcmc_last_col");
+FunctionTimer g_mu_reduced1_hw("mu_reduced1_hw");
+FunctionTimer g_mu_reduced2_hw("mu_reduced2_hw");
+FunctionTimer g_mu_reduced3_hw("mu_reduced3_hw");
+FunctionTimer g_update_omega_hw("update_omega_hw");
+FunctionTimer g_sample_omega_hw("sample_omega_hw");
+FunctionTimer g_inv_omega_11_hw("inv_omega_11_hw");
 
 
 /*
@@ -16,6 +22,12 @@ void print_times(const int nruns) {
   g_mcmc_hw_timer.getTotalDuration(nruns);
   g_eq_11_timer.getTotalDuration(nruns);
   g_mcmc_last_col_timer.getTotalDuration(nruns);
+  g_mu_reduced1_hw.getTotalDuration(nruns);
+  g_mu_reduced2_hw.getTotalDuration(nruns);
+  g_mu_reduced3_hw.getTotalDuration(nruns);
+  g_update_omega_hw.getTotalDuration(nruns);
+  g_sample_omega_hw.getTotalDuration(nruns);
+  g_inv_omega_11_hw.getTotalDuration(nruns);
 }
 
 
@@ -28,4 +40,10 @@ void reset_times() {
   g_mcmc_hw_timer.resetDuration();
   g_eq_11_timer.resetDuration();
   g_mcmc_last_col_timer.resetDuration();
+  g_mu_reduced1_hw.resetDuration();
+  g_mu_reduced2_hw.resetDuration();
+  g_mu_reduced3_hw.resetDuration();
+  g_update_omega_hw.resetDuration();
+  g_sample_omega_hw.resetDuration();
+  g_inv_omega_11_hw.resetDuration();
 }

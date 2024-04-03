@@ -44,6 +44,10 @@ List mcmc_last_col(
   /* Calculate outer product of last col  */
   arma::mat last_col_outer = fixed_last_col * fixed_last_col.t();
 
+  /* Save pth row and col element of scale mat and covariance mat */
+  const double s_mat_22 = s_mat.at(p - 1, p - 1);
+  const double scale_mat_22 = scale_mat.at(p - 1, p - 1);
+
   /* Reduce matrices */
   const int p_reduced = p - 1;
   omega = omega.submat(0, 0, p_reduced - 1, p_reduced - 1);
@@ -114,8 +118,13 @@ List mcmc_last_col(
   omega_22_acc /= nmc;
   omega_reduced_acc /= nmc;
 
+  double mc_avg_eq_11 = calc_eq_11(
+    omega_22_acc, s_mat_22, scale_mat_22, alpha, n, nmc, 
+    gamma_subtractors
+  );
+
   List z = List::create(
-    Rcpp::wrap(gamma_subtractors), Rcpp::wrap(omega_reduced_acc), omega_22_acc
+    mc_avg_eq_11, Rcpp::wrap(omega_reduced_acc), omega_22_acc
   );
 
   /* Time profiling */

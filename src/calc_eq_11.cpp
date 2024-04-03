@@ -6,7 +6,7 @@
  * This can be parallelized with OpenMP as the calculation is not inherently
  * sequential.
  */
-// [[Rcpp::export]]
+
 double calc_eq_11(
   const double omega_22_mean,
   const double s_22,
@@ -14,14 +14,8 @@ double calc_eq_11(
   const double alpha,
   const unsigned int n,
   const unsigned int nmc,
-  NumericVector gamma_vec
+  arma::vec const& gamma_subtractors
 ) {
-
-  // ARG
-  // arma::vec const& gamma_subtractors
-
-  /* Create armadillo constructor object  */
-  arma::vec gamma_subtractors(gamma_vec.begin(), nmc);
 
   /* Time profiling */
   g_eq_11_timer.TimerStart();

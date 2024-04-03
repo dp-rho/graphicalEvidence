@@ -15,6 +15,8 @@
 #include <chrono>
 #include <random>
 #include <cmath>
+#include <lapacke.h>
+#include "global_storage.h"
 #include "FunctionTimer.h"
 #include "GammaSampler.h"
 #include "prototypes.h"

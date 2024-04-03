@@ -53,6 +53,9 @@ List mcmc_hw(
 
   /* Iterate burnin + nmc times and save results past burnin  */
   arma::uword total_iters = static_cast<arma::uword>(burnin + nmc);
+
+  //g_sample_omega_hw.TimerStart();
+
   for (arma::uword i = 0; i < total_iters; i++) {
     sample_omega_hw(
       i, burnin, n, alpha, beta, omega, inv_omega_11, inv_c, omega_save,
@@ -60,6 +63,8 @@ List mcmc_hw(
       find_which_ones, find_which_zeros, scale_mat, s_mat
     );
   }
+
+  //g_sample_omega_hw.TimerEnd();
 
   /* Get posterior mean of sampled omega  */
   omega_save /= nmc;
