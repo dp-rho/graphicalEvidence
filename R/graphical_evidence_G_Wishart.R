@@ -10,15 +10,8 @@ graphical_evidence_G_Wishart <- function(
   nmc,
   alpha,
   V,
-  G,
-  start_gibbs
+  G
 ) {
-  
-  # make all matrix arguments matrices if they are not
-  xx <- as.matrix(xx)
-  S <- as.matrix(S)
-  V <- as.matrix(V)
-  G <- as.matrix(G)
   
   # Call to Rcpp function should be here:
   # compiled_G_Wishart(
@@ -47,17 +40,10 @@ graphical_evidence_G_Wishart <- function(
   # Cumulative linear shifts storage
   matrix_accumulator <- matrix(0, nrow=p, ncol=p)
   
-  # Allow user to specify Gibbs start point if desired
-  if (is.null(start_gibbs)) {
-    # This function is not high priority for C/C++ translation but ideally
-    # everything is translated eventually
-    start_point_first_gibbs <- prior_sampling(
-      p, 5, 5, G, V, alpha
-    )
-  }
-  else {
-    start_point_first_gibbs <- start_gibbs
-  }
+  # Get initial starting point
+  start_point_first_gibbs <- prior_sampling_G_Wishart(
+    p, 5, 5, G, V, alpha
+  )
 
   # Main graphical evidence loop
   for (num_G_Wishart in 1:p) {
@@ -69,6 +55,7 @@ graphical_evidence_G_Wishart <- function(
       # the data matrix xx. When num_G_Wishart = 1, we need the entire
       # matrix xx. When num_G_Wishart = 2, we need the (p-1) x (p-1)
       # block of the matrix xx. And so on ...
+      # reduced_data_xx <- xx[, permutation_order[1:(p - num_G_Wishart + 1)]]
       reduced_data_xx <- xx[, 1:(p - num_G_Wishart + 1)]
       p_reduced <- ncol(reduced_data_xx)
       S_reduced <- t(reduced_data_xx) %*% reduced_data_xx
@@ -260,6 +247,7 @@ graphical_evidence_G_Wishart <- function(
       # imposing a univariate G-wishart prior on the precision of a
       # univariate normal random variable
       
+      # xx_reduced <- xx[, permutation_order[1]]
       xx_reduced <- xx[, 1]
       S_reduced <- t(xx_reduced) %*% xx_reduced
       p_reduced <- 1
@@ -274,7 +262,6 @@ graphical_evidence_G_Wishart <- function(
       
       log_ratio_of_liklelihoods[p] <- LOG_marginal_first_col_only
     }
-    
   }
   return(sum(log_ratio_of_liklelihoods))
 }

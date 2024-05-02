@@ -1,6 +1,6 @@
 
 # Gets the initial starting point for gibbs sampler
-prior_sampling <- function(
+prior_sampling_G_Wishart <- function(
     p, 
     burnin_prior, 
     nmc_prior, 
