@@ -9,6 +9,10 @@ reset_times <- function() {
     invisible(.Call(`_graphicalEvidence_reset_times`))
 }
 
+rgamma_compiled <- function(n, vec_shapes, vec_rates) {
+    .Call(`_graphicalEvidence_rgamma_compiled`, n, vec_shapes, vec_rates)
+}
+
 bind_random_samples <- function(rgammas, rnorms) {
     invisible(.Call(`_graphicalEvidence_bind_random_samples`, rgammas, rnorms))
 }

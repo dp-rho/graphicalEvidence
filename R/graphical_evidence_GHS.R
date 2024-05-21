@@ -1,5 +1,5 @@
 
-graphical_evidence_BGL <- function(
+graphical_evidence_GHS <- function(
   xx,
   S,
   n,
@@ -45,21 +45,19 @@ graphical_evidence_BGL <- function(
         # Run unrestricted Hao Wang sampler which will
         # be used to approximate the Normal density in the
         # evaluation of the term IV_{p-j+1} - Equation (9)
-        hw_results <- BGL_Hao_Wang(
+        hw_results <- GHS_Hao_Wang(
           S_reduced, n, burnin, nmc, lambda, matrix_acc_gibbs
         )
-        print(hw_results)
         
         fixed_last_col <- (
           hw_results$post_mean_omega[1:(p_reduced - 1), p_reduced]
         )
         
-        last_col_results <- BGL_last_col_fixed(
+        last_col_results <- GHS_last_col_fixed(
           S_reduced, n, burnin, nmc, lambda, fixed_last_col,
           matrix_acc_gibbs, hw_results$post_mean_omega,
           hw_results$post_mean_tau
         )
-        print(last_col_results)
         
         # Computing IV_{p-j+1}
         log_normal_posterior_density[num_BGL] <- hw_results$MC_avg_eq_9
@@ -70,7 +68,6 @@ graphical_evidence_BGL <- function(
         
         # Computing I_{p-j+1}
         st_dev <- sqrt(1 / last_col_results$post_mean_omega_22)
-        # browser()
         mean_vec <- -(st_dev^2) * (
           reduced_data_xx[, 1:(p_reduced - 1)] %*% 
           as.matrix(hw_results$post_mean_omega[p_reduced, 1:(p_reduced - 1)])
@@ -84,8 +81,8 @@ graphical_evidence_BGL <- function(
           log_data_likelihood[num_BGL] - log_posterior_density[num_BGL]
         )
         
-        matrix_acc_gibbs[1:(p - num_BGL), 1:(p - num_BGL)] <- (
-          matrix_acc_gibbs[1:(p - num_BGL), 1:(p - num_BGL)] +
+        matrix_acc[1:(p - num_BGL), 1:(p - num_BGL)] <- (
+          matrix_acc[1:(p - num_BGL), 1:(p - num_BGL)] +
           (1 / last_col_results$post_mean_omega_22) * (
             fixed_last_col %*% t(fixed_last_col)
           )
@@ -151,7 +148,7 @@ graphical_evidence_BGL <- function(
     return(sum(log_ratio_of_likelihood) + direct_eval_log_prior_density)
     
   }, error = function(e) {
-    print(e)
+    # print(e)
     return(NaN)
   })
   print(result)

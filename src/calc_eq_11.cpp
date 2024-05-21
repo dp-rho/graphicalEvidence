@@ -31,10 +31,12 @@ double calc_eq_11(
     /* Gamma value to check is mean pth row/col of omega minus saved subtractors  */
     double temp_gamma = omega_22_mean - gamma_subtractors[i];
 
-    /* Check if temp_gamma is not positive, if so, the technique is not applicable  */
+    /* Check if temp_gamma is not positive  */
+    if (temp_gamma > 0) {
 
-    /* Accumulate the gamma density */
-    gamma_acc += gamma_density(temp_gamma, shape_param, scale_param);
+      /* Accumulate the gamma density */
+      gamma_acc += gamma_density(temp_gamma, shape_param, scale_param);
+    }
   }
   gamma_acc /= nmc;
 

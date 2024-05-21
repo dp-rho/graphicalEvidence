@@ -12,3 +12,21 @@ GammaSampler g_rgamma;
 double gamma_density(const double x, const double shape, const double scale) {
   return pow(x, shape - 1) * exp(-x / scale) / (pow(scale, shape) * tgamma(shape));
 }
+
+
+/*
+ * Returns n samples from Gamma distribution with input rates of vec_rates 
+ * and input shapes of vec_shapes
+ */
+// [[Rcpp::export]]
+NumericVector rgamma_compiled(int n, NumericVector vec_shapes, NumericVector vec_rates) {
+  
+  /* Sampled values to be returned */
+  NumericVector rval(n);
+
+  for (int i = 0; i < n; i++) {
+    rval(i) = g_rgamma.GetSample(vec_shapes[i % vec_shapes.size()], 1 / vec_rates[i % vec_rates.size()]);
+  }
+
+  return(rval);
+}

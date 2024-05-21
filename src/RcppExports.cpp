@@ -30,6 +30,19 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// rgamma_compiled
+NumericVector rgamma_compiled(int n, NumericVector vec_shapes, NumericVector vec_rates);
+RcppExport SEXP _graphicalEvidence_rgamma_compiled(SEXP nSEXP, SEXP vec_shapesSEXP, SEXP vec_ratesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vec_shapes(vec_shapesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vec_rates(vec_ratesSEXP);
+    rcpp_result_gen = Rcpp::wrap(rgamma_compiled(n, vec_shapes, vec_rates));
+    return rcpp_result_gen;
+END_RCPP
+}
 // bind_random_samples
 void bind_random_samples(NumericVector rgammas, NumericVector rnorms);
 RcppExport SEXP _graphicalEvidence_bind_random_samples(SEXP rgammasSEXP, SEXP rnormsSEXP) {
@@ -106,6 +119,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_print_times", (DL_FUNC) &_graphicalEvidence_print_times, 1},
     {"_graphicalEvidence_reset_times", (DL_FUNC) &_graphicalEvidence_reset_times, 0},
+    {"_graphicalEvidence_rgamma_compiled", (DL_FUNC) &_graphicalEvidence_rgamma_compiled, 3},
     {"_graphicalEvidence_bind_random_samples", (DL_FUNC) &_graphicalEvidence_bind_random_samples, 2},
     {"_graphicalEvidence_mcmc_hw", (DL_FUNC) &_graphicalEvidence_mcmc_hw, 10},
     {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},

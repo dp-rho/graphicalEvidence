@@ -35,7 +35,7 @@ evidence <- function(
   for (i in 1:runs) {
     
     # Use a random permutation of columns of xx
-    test_perm <- permutation_matrix[i,]
+    test_perm <- permutation_matrix[i, ]
     
     # Permute xx and prior specific parameters
     if (!is.null(G)) {
@@ -53,16 +53,20 @@ evidence <- function(
     results[i] <- switch(
       prior_name,
       
-      # Not implemented
-      'Wishart' = NULL,
-      
       # Initial R implementation
-      'BGL' = graphical_evidence_BGL(
-        xx_perm, S, n, p, burnin, nmc, lambda 
+      'Wishart' = graphical_evidence_rmatrix(
+        xx_perm, S, n, p, burnin, nmc, prior_name, alpha=alpha, V=V_perm,
       ),
       
-      # Not implemented
-      'GHS' = NULL,
+      # Initial R implementation
+      'BGL' = graphical_evidence_rmatrix(
+        xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda
+      ),
+      
+      # Initial R implementation
+      'GHS' = graphical_evidence_rmatrix(
+        xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda
+      ),
       
       # Largely implemented in C++
       'G_Wishart' = graphical_evidence_G_Wishart(
@@ -72,7 +76,10 @@ evidence <- function(
   }
   
   # Filter out infinite and NA values from results
+  init_len <- length(results)
   results <- results[!is.na(results) & !is.infinite(results)]
+  trunc_len <- length(results)
+  cat(init_len - trunc_len, "runs excluded for NaN\n")
   
   return(
     list(mean=mean(results), var=var(results), results=results)
