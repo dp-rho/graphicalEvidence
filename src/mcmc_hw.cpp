@@ -4,9 +4,8 @@
 /*
  * Use Hao Wang decomposition to run an MCMC sampler nmc + burnin times
  * and accumulate omega, mean_vec, and inv_c_required to calculate
- * mc average equation 9 after mcmc sampling is complete.
- * Currently communicates with R through Rcpp interface, will
- * eventually communicate only with other compiled code
+ * mc average equation 9 after mcmc sampling is complete for
+ * the G-Wishart prior.
  */
 // [[Rcpp::export]]
 List mcmc_hw(

@@ -17,8 +17,16 @@ bind_random_samples <- function(rgammas, rnorms) {
     invisible(.Call(`_graphicalEvidence_bind_random_samples`, rgammas, rnorms))
 }
 
+bind_random_samples_rmatrix <- function(rgammas, rnorms, rgigs, runis) {
+    invisible(.Call(`_graphicalEvidence_bind_random_samples_rmatrix`, rgammas, rnorms, rgigs, runis))
+}
+
 mcmc_hw <- function(n, burnin, nmc, alpha, p, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, init_gibbs_nvec) {
     .Call(`_graphicalEvidence_mcmc_hw`, n, burnin, nmc, alpha, p, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, init_gibbs_nvec)
+}
+
+mcmc_hw_rmatrix <- function(n, burnin, nmc, p, prior, dof, lambda, s_mat_nvec, gibbs_mat_nvec) {
+    .Call(`_graphicalEvidence_mcmc_hw_rmatrix`, n, burnin, nmc, p, prior, dof, lambda, s_mat_nvec, gibbs_mat_nvec)
 }
 
 mcmc_last_col <- function(n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec) {

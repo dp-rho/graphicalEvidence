@@ -9,9 +9,47 @@ rmatrix_Hao_Wang <- function(
   matrix_acc_gibbs = NULL,
   lambda = NULL
 ) {
+  
+  # Initialize time to calculate Hao Wang sampler
+  start_time_mcmc_hw <- proc.time()
 
-  # Initialize storage
+  coded_prior <- switch(
+    prior,
+    'Wishart' = 0,
+    'BGL' = 1,
+    'GHS'= 2
+  )
+
   p <- nrow(S)
+  
+  ##################################
+  # RcppArmadillo implementation  ##
+  ##################################
+  
+  # bind_random_samples_rmatrix(
+  #   gamma_vec, rnorm_vec, rgig_vec, c(1)
+  # )
+  
+  hw_results <- mcmc_hw_rmatrix(
+    n, burnin, nmc, p, coded_prior, dof, lambda, S, matrix_acc_gibbs
+  )
+  
+  ### R code time profiling ###
+  calc_time <- proc.time() - start_time_mcmc_hw
+  g_time_env$mcmc_hw_calc_time <- (
+    g_time_env$mcmc_hw_calc_time + calc_time
+  )
+  ######################
+
+  return(list(
+    post_mean_omega=hw_results[[1]],
+    post_mean_tau=hw_results[[2]],
+    MC_avg_eq_9=hw_results[[3]]
+  ))
+  
+  ##################################
+  
+  # Initialize storage
   tau_acc <- matrix(0, nrow=p, ncol=p)
   omega_acc <- matrix(0, nrow=p, ncol=p)
   normal_density_acc <- 0
@@ -42,6 +80,15 @@ rmatrix_Hao_Wang <- function(
   if (prior == 'GHS'){
     nu <- matrix(1, nrow=p, ncol=p)
   }
+  
+  # Random generation debug
+  # rnorm_index <- 1
+  # rgig_index <- 1
+  # rgamma_index <- 1
+  # gamma_vec <- numeric((burnin + nmc) * p)
+  # rnorm_vec <- numeric((burnin + nmc) * p * (p - 1))
+  # rgig_vec <- numeric((burnin + nmc) * p * (p - 1))
+  # runi_vec <- c()
   
   # Begin main MCMC loop
   for (iter in 1:(burnin + nmc)) {
@@ -104,17 +151,25 @@ rmatrix_Hao_Wang <- function(
       }
       
       # Sampling from the Normal density of Equation (15) in the paper
-      beta <- mu_i + solve(chol(inv_c), rnorm(p - 1))
+      cur_rnorm <- rnorm(p - 1)
+      # rnorm_vec[rnorm_index:(rnorm_index + p - 2)] <- cur_rnorm
+      # rnorm_index <- rnorm_index + p - 1 
+      beta <- mu_i + solve(chol(inv_c), cur_rnorm)
       
       # Sampling from the gamma density of EQ 15
       gamma_param <- rgamma_compiled(1, shape, 1 / scale)
-
+      # gamma_vec[rgamma_index] <- gamma_param
+      # rgamma_index <- rgamma_index + 1
+      
       omega_22 <- gamma_param + t(beta) %*% inv_omega_11 %*% beta
       
       # Update omega
       omega[i, ind_noi] <- beta
       omega[ind_noi, i] <- beta
       omega[i, i] <- omega_22
+      
+      # cat("R code omega iter:", iter, "ith: ", i, "\n")
+      # print(omega)
       
       if (prior != 'Wishart') {
         # Update sigma
@@ -127,13 +182,23 @@ rmatrix_Hao_Wang <- function(
         cur_sigma[i, ind_noi] <- sigma_12
         cur_sigma[i, i] <- sigma_22
         
+        # cat("R code cur_sigma iter:", iter, "ith: ", i, "\n")
+        # print(cur_sigma)
+        
         # Update tau and nu if needed
         if (prior == 'BGL') {
           mu_prime_sq <- lambda^2 / (beta + vec_acc_21)^2
           a_gig_tau <- lambda^2 / mu_prime_sq
           u_12 <- numeric(p - 1)
           for (tau_id in 1:(p - 1)){
-            u_12[tau_id] <- gigrnd(-1 / 2, a_gig_tau[tau_id], lambda^2, 1)
+            # cat("R code ith:", i, "iter:", tau_id, "\n")
+            # print(a_gig_tau[tau_id])
+            debug_ls <- gigrnd(-1 / 2, a_gig_tau[tau_id], lambda^2, 1)
+            u_12[tau_id] <- debug_ls
+            # cat("R code sampled tau: ", 1 / debug_ls$ans, "\n")
+            # runi_vec <- c(runi_vec, debug_ls$usample)
+            # rgig_vec[rgig_index] <- u_12[tau_id]
+            # rgig_index <- rgig_index + 1
           }
           tau_12 <- 1 / u_12
         }
@@ -147,6 +212,9 @@ rmatrix_Hao_Wang <- function(
         
         tau[i, ind_noi] <- tau_12
         tau[ind_noi, i] <- tau_12
+        
+        # cat("R code tau iter:", iter, "ith: ", i, "\n")
+        # print(tau)
         
       }
     }
@@ -170,7 +238,13 @@ rmatrix_Hao_Wang <- function(
   }
   MC_avg_eq_9 <- log(normal_density_acc / nmc)
   
-
+  ### R code time profiling ###
+  calc_time <- proc.time() - start_time_mcmc_hw
+  g_time_env$mcmc_hw_calc_time <- (
+    g_time_env$mcmc_hw_calc_time + calc_time
+  )
+  ######################
+  
   return(list(
     MC_avg_eq_9=MC_avg_eq_9,
     post_mean_omega=omega_acc,

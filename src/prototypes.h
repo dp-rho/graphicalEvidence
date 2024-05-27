@@ -2,6 +2,8 @@
 
 /* Functions in inject_random.cpp */
 double extract_rgamma();
+double extract_rgig();
+double extract_runi();
 void extract_rnorm(double*, unsigned int);
 
 /* Functions in GammaSampler.cpp  */
@@ -48,7 +50,29 @@ void sample_omega_hw(
   arma::mat const&, arma::mat const&
 );
 
+/* Functions in sample_omega_hw_rmatrix */
+void sample_omega_hw_rmatrix(
+  const int, const int, const int, const int, const int, const int,
+  arma::vec&, arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
+  arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::cube&, arma::mat const&,
+  arma::umat const&, arma::mat const&, const double, const double*
+);
+
+void efficient_inv_omega_11_calc(
+  arma::mat&, arma::uvec const&, arma::mat const&,
+  const unsigned int, const unsigned int
+);
+
+void update_sigma_inplace(
+  arma::mat&, arma::mat const&, arma::vec const&, arma::uvec const&,
+  const double, const unsigned int, const unsigned int
+);
+
 /* Functions in initialize_indices.cpp  */
+void initialize_indices(
+  arma::umat&
+);
+
 void initialize_indices(
   arma::mat const&, arma::umat&, std::vector<arma::uvec>&,
   std::vector<arma::uvec>&
@@ -63,7 +87,32 @@ void sample_omega_last_col(
   arma::mat const&
 );
 
+/* Functions in calc_eq_11.cpp  */
 double calc_eq_11(
   const double, const double, const double, const double,
   const unsigned int, const unsigned int, arma::vec const&
+);
+
+/* Functions in gigrnd.cpp  */
+double gigrnd(
+  double, double, double
+);
+
+double psi(
+  double, double, double
+);
+
+double dpsi(
+  double, double, double
+);
+
+double fun_g(
+  double, double, double, double, double
+);
+
+/* Functions in mcmc_hw_rmatrix */
+/* mcmc_hw_rmatrix() not called internally  */
+void get_gamma_params_hw_rmatrix(
+  double*, double*, const int, const int, const int,
+  const int, arma::mat const&
 );

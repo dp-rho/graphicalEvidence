@@ -1,5 +1,9 @@
 /* global_storage.h */
 
+/* Global constants for prior coding and size */
+#define WISHART (0)
+#define BGL (1)
+#define GHS (2)
 #define MAX_DIM (100)
 
 /* Global info storage for manual LAPACK calls  */

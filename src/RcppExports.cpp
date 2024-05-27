@@ -54,6 +54,19 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// bind_random_samples_rmatrix
+void bind_random_samples_rmatrix(NumericVector rgammas, NumericVector rnorms, NumericVector rgigs, NumericVector runis);
+RcppExport SEXP _graphicalEvidence_bind_random_samples_rmatrix(SEXP rgammasSEXP, SEXP rnormsSEXP, SEXP rgigsSEXP, SEXP runisSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type rgammas(rgammasSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rnorms(rnormsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type rgigs(rgigsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type runis(runisSEXP);
+    bind_random_samples_rmatrix(rgammas, rnorms, rgigs, runis);
+    return R_NilValue;
+END_RCPP
+}
 // mcmc_hw
 List mcmc_hw(int n, int burnin, int nmc, int alpha, int p, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector init_gibbs_nvec);
 RcppExport SEXP _graphicalEvidence_mcmc_hw(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP s_mat_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP g_mat_adj_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP init_gibbs_nvecSEXP) {
@@ -71,6 +84,25 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type init_gibbs_nvec(init_gibbs_nvecSEXP);
     rcpp_result_gen = Rcpp::wrap(mcmc_hw(n, burnin, nmc, alpha, p, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, init_gibbs_nvec));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mcmc_hw_rmatrix
+List mcmc_hw_rmatrix(int n, int burnin, int nmc, int p, int prior, int dof, int lambda, NumericVector s_mat_nvec, NumericVector gibbs_mat_nvec);
+RcppExport SEXP _graphicalEvidence_mcmc_hw_rmatrix(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP pSEXP, SEXP priorSEXP, SEXP dofSEXP, SEXP lambdaSEXP, SEXP s_mat_nvecSEXP, SEXP gibbs_mat_nvecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< int >::type nmc(nmcSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< int >::type dof(dofSEXP);
+    Rcpp::traits::input_parameter< int >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcmc_hw_rmatrix(n, burnin, nmc, p, prior, dof, lambda, s_mat_nvec, gibbs_mat_nvec));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -121,7 +153,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_reset_times", (DL_FUNC) &_graphicalEvidence_reset_times, 0},
     {"_graphicalEvidence_rgamma_compiled", (DL_FUNC) &_graphicalEvidence_rgamma_compiled, 3},
     {"_graphicalEvidence_bind_random_samples", (DL_FUNC) &_graphicalEvidence_bind_random_samples, 2},
+    {"_graphicalEvidence_bind_random_samples_rmatrix", (DL_FUNC) &_graphicalEvidence_bind_random_samples_rmatrix, 4},
     {"_graphicalEvidence_mcmc_hw", (DL_FUNC) &_graphicalEvidence_mcmc_hw, 10},
+    {"_graphicalEvidence_mcmc_hw_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_hw_rmatrix, 9},
     {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},
     {"_graphicalEvidence_set_cores", (DL_FUNC) &_graphicalEvidence_set_cores, 1},
     {"_graphicalEvidence_set_seed", (DL_FUNC) &_graphicalEvidence_set_seed, 1},

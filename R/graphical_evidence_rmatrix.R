@@ -9,9 +9,9 @@ graphical_evidence_rmatrix <- function(
   burnin,
   nmc,
   prior,
-  lambda = NULL,
-  alpha = NULL,
-  V = NULL
+  lambda = 0,
+  alpha = 0,
+  V = 0
 ) {
 
   # Initialize storage for I_{p-j+1} -IV_{p-j+1} for every j from 1 to p

@@ -4,7 +4,7 @@
 /*
  * Sample Omega using Hao Wang decomposition Wang decomposition MCMC sampling.
  * Updates omega accumulator, inv_c accumulator, and mean_vec accumulator as 
- * determined by iterations exceeding burnin period
+ * determined by iterations exceeding burnin period, G-Wishart prior
  */
 
 void sample_omega_hw(
