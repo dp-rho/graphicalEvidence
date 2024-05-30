@@ -29,11 +29,11 @@ rmatrix_Hao_Wang <- function(
   # bind_random_samples_rmatrix(
   #   gamma_vec, rnorm_vec, rgig_vec, c(1)
   # )
-  
+
   hw_results <- mcmc_hw_rmatrix(
     n, burnin, nmc, p, coded_prior, dof, lambda, S, matrix_acc_gibbs
   )
-  
+
   ### R code time profiling ###
   calc_time <- proc.time() - start_time_mcmc_hw
   g_time_env$mcmc_hw_calc_time <- (
@@ -148,6 +148,8 @@ rmatrix_Hao_Wang <- function(
       if ((iter > burnin) & (i == p)) {
         inv_c_store[, , (iter - burnin)] <- inv_c
         mean_vec_store[, (iter - burnin)] <- mu_i
+        inv_c_acc <- inv_c_acc + inv_c
+        mean_vec_acc <- mean_vec_acc + mu_i
       }
       
       # Sampling from the Normal density of Equation (15) in the paper

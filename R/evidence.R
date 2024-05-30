@@ -48,7 +48,7 @@ evidence <- function(
     # Permute xx and calculate S
     xx_perm <- as.matrix(xx[, test_perm])
     S <- as.matrix(t(xx_perm) %*% xx_perm)
-    
+
     # Run graphical evidence method on identified prior
     results[i] <- switch(
       prior_name,

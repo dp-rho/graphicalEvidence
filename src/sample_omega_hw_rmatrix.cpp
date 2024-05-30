@@ -14,7 +14,7 @@ void sample_omega_hw_rmatrix(
   const int n,
   const int prior,
   const int dof,
-  const int lambda,
+  const double lambda,
   arma::vec& beta,
   arma::mat& omega,
   arma::mat& cur_sigma,
@@ -32,12 +32,21 @@ void sample_omega_hw_rmatrix(
   const double shape,
   const double* scale_vec
 ) {
-
+  
   /* Number of cols to be iterated through  */
   arma::uword const p = s_mat.n_rows;
 
+  /* LAPACK args  */
+  char uplo = 'U';
+  double one = 1.0;
+  int nrhs = 1;
+  int dim = p - 1;
+
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
+
+  /* Calculate this constant that is used in GHS  */
+  const double lambda_sq = pow(lambda, 2);
 
   /* Use existing global memory to avoid constant reallocaiton  */
   arma::vec flex_mem = arma::vec(g_vec1, p - 1, false, true);
@@ -95,28 +104,63 @@ void sample_omega_hw_rmatrix(
 
     /* GHS case */
     else if (prior == GHS) {
-      /* TODO: GHS  */
+      
+      /* Time profiling */
+      g_inv_omega_11_hw.TimerStart();
+
+      /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
+      efficient_inv_omega_11_calc(inv_omega_11, ind_noi, cur_sigma, p, i);
+
+      inv_c = inv_omega_11 * (s_mat.at(i, i) + (1 / lambda));
+      for (unsigned int j = 0; j < (p - 1); j++) {
+
+        /* Update inv_c diagonal  */
+        inv_c.at(j, j) += (1 / (tau.at(ind_noi[j], i) * lambda_sq));
+
+        /* update solve for */
+        solve_for[j] = s_mat.at(ind_noi[j], i) + (
+          gibbs_mat.at(ind_noi[j], i) / (tau.at(ind_noi[j], i) * lambda_sq)
+        );
+      }
+
+      g_inv_omega_11_hw.TimerEnd();
+
+    }
+
+    /* Save inv_c before solving for chol(inv_c)  */
+    if (((iter - burnin) >= 0) && (i == (p - 1))) {
+      inv_c_required_store.slice(iter - burnin) = inv_c;
     }
 
     g_mu_reduced1_hw.TimerStart();
-    /* Solve for mu_i, store in flex_mem */
-    flex_mem = -arma::solve(inv_c, solve_for);
-    g_mu_reduced1_hw.TimerEnd();
 
-    /* Save mu_i and inv_c if this is the final iteration */
+    /* -mu_i = solve(inv_c, solve_for), store chol(inv_c) in the pointer of inv_c */
+    LAPACK_dposv(
+      &uplo, &dim, &nrhs, inv_c.memptr(), &dim, solve_for.memptr(), &dim, &info_int
+    );
+
+    /* Save mu_i before memory is used to calculate beta  */
     if (((iter - burnin) >= 0) && (i == (p - 1))) {
-      inv_c_required_store.slice(iter - burnin) = inv_c;
-      mean_vec_store.col(iter - burnin) = flex_mem;
+      mean_vec_store.col(iter - burnin) = -solve_for;
     }
 
-    /* Use existing memory to calculate beta, previous values */
-    /* will not be needed again                               */
+    g_mu_reduced1_hw.TimerEnd();
+
     g_mu_reduced2_hw.TimerStart();
-    inv_c = arma::chol(inv_c);
-    solve_for.randn();
-    // extract_rnorm(solve_for.memptr(), p - 1);
-    beta = flex_mem + arma::solve(inv_c, solve_for);
+
+    /* Generate random normals needed to solve for beta */
+    flex_mem.randn();
+
+    /* Solve chol(inv_c) x = randn(), store result in flex_mem  */
+    cblas_dtrsm(
+      CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, dim, nrhs, one, 
+      inv_c.memptr(), dim, flex_mem.memptr(), dim
+    );
+    beta = -solve_for + flex_mem;
+
     g_mu_reduced2_hw.TimerEnd();
+
+    g_sample_omega_hw.TimerStart();
 
     /* Update flex_mem to store inv_omega_11 %*% beta */
     flex_mem = inv_omega_11 * beta;
@@ -127,7 +171,8 @@ void sample_omega_hw_rmatrix(
       omega.at(i, ind_noi[j]) = beta[j];
     }
     omega.at(i, i) = gamma_param + arma::dot(beta, flex_mem);
-    // arma::cout << "omega at iter: (" << iter << ") ith: (" << i << ")\n" << omega << arma::endl;
+
+    g_sample_omega_hw.TimerEnd();
 
     /* Update sampling parameters for next iteration in prior specific method */
     
@@ -150,28 +195,44 @@ void sample_omega_hw_rmatrix(
 
       /* Calculate a_gig_tau and resuse variable to sample tau_12 */
       for (unsigned int j = 0; j < (p - 1); j++) {
-        //arma::cout << "ith: " << i << " iter " << j << arma::endl;
+
         double gig_tau = pow(beta[j] + gibbs_mat.at(i, ind_noi[j]), 2);
-        //arma::cout << "gig_tau " << gig_tau << arma::endl;
         gig_tau = 1 / gigrnd(-1.0 / 2.0, gig_tau, pow(lambda, 2));
-        // arma::cout << "sampled tau: " << gig_tau << arma::endl;
-        // gig_tau = 1 / extract_rgig();
         tau.at(ind_noi[j], i) = gig_tau;
         tau.at(i, ind_noi[j]) = gig_tau;
       }
 
       g_update_omega_hw.TimerEnd();
-      
-      //arma::cout << "tau at iter: (" << iter << ") ith: (" << i << ")\n" << tau << arma::endl;
     }
 
     /* GHS case */
     else if (prior == GHS) {
-      /* TODO: GHS  */
-    }
+      g_mu_reduced3_hw.TimerStart();
+      /* Update sigma */
+      update_sigma_inplace(
+        cur_sigma, inv_omega_11, flex_mem, ind_noi, gamma_param, p, i
+      );
+      g_mu_reduced3_hw.TimerEnd();
 
-    // arma::cout << "sigma at iter: (" << iter << ") ith: (" << i << ")\n" << cur_sigma << arma::endl;
-    // arma::cout << "tau at iter: (" << iter << ") ith: (" << i << ")\n" << tau << arma::endl;
+      g_update_omega_hw.TimerStart();
+      /* Sample tau_12 and nu_12 */
+      for (unsigned int j = 0; j < (p - 1); j++) {
+
+        const double cur_rate = (
+          pow(beta[j], 2) / (2 * lambda_sq) + (1 / nu.at(ind_noi[j], i))
+        );
+
+        const double cur_tau = 1 / g_rgamma.GetSample(1, 1 / cur_rate);
+        const double cur_nu = 1 / g_rgamma.GetSample(1, 1 / (1 + (1 / cur_tau)));
+
+        tau.at(ind_noi[j], i) = cur_tau;
+        tau.at(i, ind_noi[j]) = cur_tau;
+        nu.at(ind_noi[j], i) = cur_nu;
+        nu.at(i, ind_noi[j]) = cur_nu;
+      }
+
+      g_update_omega_hw.TimerEnd();
+    }
 
   }
 

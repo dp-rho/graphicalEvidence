@@ -35,11 +35,11 @@ void sample_omega_hw(
 
     /* Generate random gamma sample based */
     const double gamma_sample = g_rgamma.GetSample(
-      (double) alpha + (n / 2) + 1, 2 / (s_mat.at(i, i) + scale_mat.at(i, i))
+      (double) alpha + ((double) n / 2) + 1, 2 / (s_mat.at(i, i) + scale_mat.at(i, i))
     );
 
     /* Time profiling */
-    //g_inv_omega_11_hw.TimerStart();
+    g_inv_omega_11_hw.TimerStart();
 
     /* Calculate inverse of omega excluding row and col i */
     inv_omega_11 = arma::inv(
@@ -47,7 +47,7 @@ void sample_omega_hw(
     );
 
     /* Time profiling */
-    //g_inv_omega_11_hw.TimerEnd();
+    g_inv_omega_11_hw.TimerEnd();
 
     /* Update ith row and col of omega by calculating beta, if i == (p - 1),  */
     /* and burnin is completed, save results in accumulator variables         */
@@ -65,7 +65,7 @@ void sample_omega_hw(
     if (reduced_dim) {
 
       /* Time profiling */
-      //g_mu_reduced1_hw.TimerStart();
+      g_mu_reduced1_hw.TimerStart();
 
       /* Case where some ones are found in current col  */
       inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
@@ -81,10 +81,10 @@ void sample_omega_hw(
       );
       
       /* Time profiling */
-      //g_mu_reduced1_hw.TimerEnd();
+      g_mu_reduced1_hw.TimerEnd();
 
       /* Time profiling */
-      //g_mu_reduced2_hw.TimerStart();
+      g_mu_reduced2_hw.TimerStart();
 
       arma::vec mu_reduced = -arma::vec(g_vec2, reduced_dim, false);
 
@@ -97,10 +97,10 @@ void sample_omega_hw(
       }
 
       /* Time profiling */
-      //g_mu_reduced2_hw.TimerEnd();
+      g_mu_reduced2_hw.TimerEnd();
 
       /* Time profiling */
-      //g_mu_reduced3_hw.TimerStart();
+      g_mu_reduced3_hw.TimerStart();
       
       mu_reduced += arma::solve(
         arma::chol(inv_c.submat(find_which_ones[i], find_which_ones[i])), 
@@ -110,11 +110,11 @@ void sample_omega_hw(
       beta.elem(find_which_ones[i]) = mu_reduced;
 
       /* Time profiling */
-      //g_mu_reduced3_hw.TimerEnd();
+      g_mu_reduced3_hw.TimerEnd();
     }
 
     /* Time profiling */
-    //g_update_omega_hw.TimerStart();
+    g_update_omega_hw.TimerStart();
 
     /* Update ith col and row of omega */
     omega.submat(arma::uvec({i}), ind_noi_mat.col(i)) = beta.t();
@@ -122,7 +122,7 @@ void sample_omega_hw(
     omega.at(i, i) = gamma_sample + arma::dot(beta.t() * inv_omega_11, beta);
 
     /* Time profiling */
-    //g_update_omega_hw.TimerEnd();
+    g_update_omega_hw.TimerEnd();
   }
 
   /* If iteration is past burnin period, accumulate Omega */

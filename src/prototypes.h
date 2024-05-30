@@ -52,7 +52,7 @@ void sample_omega_hw(
 
 /* Functions in sample_omega_hw_rmatrix */
 void sample_omega_hw_rmatrix(
-  const int, const int, const int, const int, const int, const int,
+  const int, const int, const int, const int, const int, const double,
   arma::vec&, arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
   arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::cube&, arma::mat const&,
   arma::umat const&, arma::mat const&, const double, const double*
@@ -114,5 +114,5 @@ double fun_g(
 /* mcmc_hw_rmatrix() not called internally  */
 void get_gamma_params_hw_rmatrix(
   double*, double*, const int, const int, const int,
-  const int, arma::mat const&
+  const double, arma::mat const&
 );

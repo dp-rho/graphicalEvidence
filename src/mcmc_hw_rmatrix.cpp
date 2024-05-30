@@ -15,7 +15,7 @@ List mcmc_hw_rmatrix(
   int p,
   int prior,
   int dof,
-  int lambda,
+  double lambda,
   NumericVector s_mat_nvec,
   NumericVector gibbs_mat_nvec
 ) {
@@ -25,6 +25,12 @@ List mcmc_hw_rmatrix(
 
   /* Time profiling */
   g_mcmc_hw_timer.TimerStart();
+
+  /* Create accumulating storage for mcmc sampling  */
+  arma::mat mean_vec_store = arma::mat(p - 1, nmc);
+  arma::cube inv_c_required_store = arma::cube(p - 1, p - 1, nmc);
+  arma::mat omega_save = arma::zeros<arma::mat>(p, p);
+  arma::mat tau_save = arma::zeros<arma::mat>(p, p);
 
   /* Only BGL and GHS require gibbs accumulator matrix  */
   arma::mat gibbs_mat;
@@ -42,7 +48,12 @@ List mcmc_hw_rmatrix(
   arma::mat tau;
   arma::mat nu;
 
-  /* These iterating variable are dependent on prior  */
+  /* Allocate working memory in top level scope */
+  arma::mat inv_omega_11 = arma::zeros<arma::mat>(p - 1, p - 1);
+  arma::mat inv_c = arma::zeros<arma::mat>(p - 1, p - 1);
+  arma::vec beta = arma::zeros<arma::vec>(p - 1);
+
+  /* Allocate additional iterating variables dependent on prior */
   if (prior == BGL || prior == GHS) {
 
     /* Tau required for BGL and GHS */
@@ -54,17 +65,6 @@ List mcmc_hw_rmatrix(
       nu = arma::ones(p, p);
     }
   }
-
-  /* Create accumulating storage for mcmc sampling  */
-  arma::mat mean_vec_store = arma::zeros<arma::mat>(p - 1, nmc);
-  arma::cube inv_c_required_store = arma::zeros<arma::cube>(p - 1, p - 1, nmc);
-  arma::mat omega_save = arma::zeros<arma::mat>(p, p);
-  arma::mat tau_save = arma::zeros<arma::mat>(p, p);
-
-  /* Allocate working memory in top level scope */
-  arma::mat inv_omega_11 = arma::zeros(p - 1, p - 1);
-  arma::mat inv_c = arma::zeros(p - 1, p - 1);
-  arma::vec beta = arma::zeros(p - 1);
 
   /* Iterate burnin + nmc times and save results past burnin  */
   arma::uword total_iters = static_cast<arma::uword>(burnin + nmc);
@@ -114,7 +114,7 @@ void get_gamma_params_hw_rmatrix(
   const int prior,
   const int dof,
   const int n,
-  const int lambda,
+  const double lambda,
   arma::mat const& s_mat
 ) {
 
@@ -122,19 +122,19 @@ void get_gamma_params_hw_rmatrix(
   arma::uword const p = s_mat.n_rows;
 
   if (prior == WISHART) {
-    *shape = (dof + n - p + 1) / 2;
+    *shape = ((double) dof + n - p + 1) / 2;
     for (unsigned int i = 0; i < p; i++) {
       scale_vec[i] = 2 / (s_mat.at(i, i) + 1);
     }
   }
   else if (prior == BGL) {
-    *shape = (n / 2) + 1;
+    *shape = ((double) n / 2) + 1;
     for (unsigned int i = 0; i < p; i++) {
       scale_vec[i] = 2 / (s_mat.at(i, i) + lambda);
     }
   }
-  else if (prior == BGL) {
-    *shape = (n / 2) + 1;
+  else if (prior == GHS) {
+    *shape = ((double) n / 2) + 1;
     for (unsigned int i = 0; i < p; i++) {
       scale_vec[i] = 2 / (s_mat.at(i, i) + (1 / lambda));
     }

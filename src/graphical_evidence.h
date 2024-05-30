@@ -16,6 +16,7 @@
 #include <random>
 #include <cmath>
 #include <lapacke.h>
+#include <cblas.h>
 #include "global_storage.h"
 #include "FunctionTimer.h"
 #include "GammaSampler.h"

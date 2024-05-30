@@ -88,7 +88,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // mcmc_hw_rmatrix
-List mcmc_hw_rmatrix(int n, int burnin, int nmc, int p, int prior, int dof, int lambda, NumericVector s_mat_nvec, NumericVector gibbs_mat_nvec);
+List mcmc_hw_rmatrix(int n, int burnin, int nmc, int p, int prior, int dof, double lambda, NumericVector s_mat_nvec, NumericVector gibbs_mat_nvec);
 RcppExport SEXP _graphicalEvidence_mcmc_hw_rmatrix(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP pSEXP, SEXP priorSEXP, SEXP dofSEXP, SEXP lambdaSEXP, SEXP s_mat_nvecSEXP, SEXP gibbs_mat_nvecSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -99,7 +99,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type prior(priorSEXP);
     Rcpp::traits::input_parameter< int >::type dof(dofSEXP);
-    Rcpp::traits::input_parameter< int >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
     rcpp_result_gen = Rcpp::wrap(mcmc_hw_rmatrix(n, burnin, nmc, p, prior, dof, lambda, s_mat_nvec, gibbs_mat_nvec));

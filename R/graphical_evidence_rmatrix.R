@@ -13,7 +13,7 @@ graphical_evidence_rmatrix <- function(
   alpha = 0,
   V = 0
 ) {
-
+  
   # Initialize storage for I_{p-j+1} -IV_{p-j+1} for every j from 1 to p
   log_ratio_of_likelihood <- numeric(p)
   log_data_likelihood <- numeric(p)
