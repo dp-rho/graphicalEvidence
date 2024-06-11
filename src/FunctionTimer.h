@@ -42,3 +42,8 @@ extern FunctionTimer g_mu_reduced3_hw;
 extern FunctionTimer g_update_omega_hw;
 extern FunctionTimer g_sample_omega_hw;
 extern FunctionTimer g_inv_omega_11_hw;
+extern FunctionTimer g_last_col_t1;
+extern FunctionTimer g_last_col_t2;
+extern FunctionTimer g_last_col_t3;
+extern FunctionTimer g_last_col_t4;
+extern FunctionTimer g_last_col_t5;

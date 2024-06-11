@@ -37,9 +37,6 @@ void sample_omega_hw_rmatrix(
   arma::uword const p = s_mat.n_rows;
 
   /* LAPACK args  */
-  char uplo = 'U';
-  double one = 1.0;
-  int nrhs = 1;
   int dim = p - 1;
 
   /* Allow selection of all elements besides the ith element  */
@@ -186,7 +183,7 @@ void sample_omega_hw_rmatrix(
       g_mu_reduced3_hw.TimerStart();
       /* Update sigma */
       update_sigma_inplace(
-        cur_sigma, inv_omega_11, flex_mem, ind_noi, gamma_param, p, i
+        cur_sigma, inv_omega_11, flex_mem.memptr(), ind_noi, gamma_param, p, i
       );
       g_mu_reduced3_hw.TimerEnd();
       
@@ -210,7 +207,7 @@ void sample_omega_hw_rmatrix(
       g_mu_reduced3_hw.TimerStart();
       /* Update sigma */
       update_sigma_inplace(
-        cur_sigma, inv_omega_11, flex_mem, ind_noi, gamma_param, p, i
+        cur_sigma, inv_omega_11, flex_mem.memptr(), ind_noi, gamma_param, p, i
       );
       g_mu_reduced3_hw.TimerEnd();
 
@@ -284,7 +281,7 @@ void efficient_inv_omega_11_calc(
 void update_sigma_inplace(
   arma::mat& sigma,
   arma::mat const& inv_omega_11,
-  arma::vec const& omega_beta,
+  double* omega_beta,
   arma::uvec const& ind_noi,
   const double gamma_param,
   const unsigned int p,

@@ -12,7 +12,7 @@ List mcmc_hw(
   int n,
   int burnin,
   int nmc,
-  int alpha,
+  double alpha,
   int p,
   NumericVector s_mat_nvec,
   NumericVector scale_mat_nvec,
@@ -27,6 +27,8 @@ List mcmc_hw(
   arma::mat omega(init_gibbs_nvec.begin(), p, p);
   arma::mat gibbs_mat(gibbs_mat_nvec.begin(), p, p);
   arma::mat g_mat_adj(g_mat_adj_nvec.begin(), p, p);
+
+  arma::mat sigma = arma::inv(omega);
 
   /* Time profiling */
   g_mcmc_hw_timer.TimerStart();
@@ -59,7 +61,7 @@ List mcmc_hw(
     sample_omega_hw(
       i, burnin, n, alpha, beta, omega, inv_omega_11, inv_c, omega_save,
       mean_vec_store, inv_c_required_store, gibbs_mat, g_mat_adj, ind_noi_mat,
-      find_which_ones, find_which_zeros, scale_mat, s_mat
+      find_which_ones, find_which_zeros, scale_mat, s_mat, sigma
     );
   }
 

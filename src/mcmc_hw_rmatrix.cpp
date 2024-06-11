@@ -14,7 +14,7 @@ List mcmc_hw_rmatrix(
   int nmc,
   int p,
   int prior,
-  int dof,
+  double dof,
   double lambda,
   NumericVector s_mat_nvec,
   NumericVector gibbs_mat_nvec

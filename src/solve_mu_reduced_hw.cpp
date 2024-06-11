@@ -5,7 +5,6 @@
  */
 
 void in_place_update_solve_for(
-  arma::rowvec const& rvec,
   arma::mat const& smat,
   arma::uvec const& row_indices,
   arma::uvec const& col_indices
@@ -14,7 +13,7 @@ void in_place_update_solve_for(
   for (unsigned int i = 0; i < col_indices.n_elem; i++) {
     double sum = 0.0;
     for (unsigned int j = 0; j < row_indices.n_elem; j++) {
-      sum += rvec[j] * smat.at(row_indices[j], col_indices[i]);
+      sum += g_vec1[j] * smat.at(row_indices[j], col_indices[i]);
     }
     g_vec2[i] += sum;
   }
@@ -30,17 +29,26 @@ void in_place_solve_mu_reduced(
   arma::uvec const& one_indices
 ) {
 
+  /* LAPACK args  */
   int dim = one_indices.n_elem;
+  
   int assign_index = 0;
-  for (int i = 0; i < dim; i++) {
-    for (int j = 0; j < dim; j++) {
+  for (unsigned int i = 0; i < (unsigned int) dim; i++) {
+    for (unsigned int j = 0; j < (unsigned int) dim; j++) {
       g_mat1[assign_index++] = inv_c.at(one_indices[j], one_indices[i]);
     }
   }
 
-  /* reuse assign index as NRHS */
-  assign_index = 1;
-  LAPACK_dgesv(&dim, &assign_index, g_mat1, &dim, g_ipv, g_vec2, &dim, &info_int);
+  /* Store chol(inv_c[which_ones, which_ones]) in g_mat1, store solution to system  */
+  /* of linear equations in g_vec2                                                 */
+  LAPACK_dposv(
+    &uplo, &dim, &nrhs, g_mat1, &dim, g_vec2, &dim, &info_int
+  );
+
+  /* Result has to be multiplied by -1  */
+  for (unsigned int i = 0; i < (unsigned int) dim; i++) {
+    g_vec2[i] = -g_vec2[i];
+  }
 }
 
 
@@ -52,8 +60,7 @@ void solve_mu_reduced_hw_in_place(
   const unsigned int i,
   arma::uvec const& reduced_one_ind,
   arma::uvec const& reduced_zero_ind,
-  arma::mat const& inv_c,
-  arma::rowvec const& vec_acc_21
+  arma::mat const& inv_c
 ) {
 
   /* If there are any zero values in currently considered column  */
@@ -61,7 +68,7 @@ void solve_mu_reduced_hw_in_place(
 
     /* Multiply in place with relevant inv_C submat */
     in_place_update_solve_for(
-      vec_acc_21, inv_c, reduced_zero_ind, reduced_one_ind
+      inv_c, reduced_zero_ind, reduced_one_ind
     );
   }
 

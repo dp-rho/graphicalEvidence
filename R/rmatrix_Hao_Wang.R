@@ -5,9 +5,9 @@ rmatrix_Hao_Wang <- function(
   burnin,
   nmc,
   prior,
-  dof = NULL,
-  matrix_acc_gibbs = NULL,
-  lambda = NULL
+  dof = 0,
+  matrix_acc_gibbs = 0,
+  lambda = 0
 ) {
   
   # Initialize time to calculate Hao Wang sampler
@@ -155,7 +155,7 @@ rmatrix_Hao_Wang <- function(
       # Sampling from the Normal density of Equation (15) in the paper
       cur_rnorm <- rnorm(p - 1)
       # rnorm_vec[rnorm_index:(rnorm_index + p - 2)] <- cur_rnorm
-      # rnorm_index <- rnorm_index + p - 1 
+      # rnorm_index <- rnorm_index + p - 1
       beta <- mu_i + solve(chol(inv_c), cur_rnorm)
       
       # Sampling from the gamma density of EQ 15

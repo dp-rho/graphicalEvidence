@@ -11,6 +11,11 @@ FunctionTimer g_mu_reduced3_hw("mu_reduced3_hw");
 FunctionTimer g_update_omega_hw("update_omega_hw");
 FunctionTimer g_sample_omega_hw("sample_omega_hw");
 FunctionTimer g_inv_omega_11_hw("inv_omega_11_hw");
+FunctionTimer g_last_col_t1("g_last_col_t1");
+FunctionTimer g_last_col_t2("g_last_col_t2");
+FunctionTimer g_last_col_t3("g_last_col_t3");
+FunctionTimer g_last_col_t4("g_last_col_t4");
+FunctionTimer g_last_col_t5("g_last_col_t5");
 
 
 /*
@@ -28,6 +33,11 @@ void print_times(const int nruns) {
   g_update_omega_hw.getTotalDuration(nruns);
   g_sample_omega_hw.getTotalDuration(nruns);
   g_inv_omega_11_hw.getTotalDuration(nruns);
+  g_last_col_t1.getTotalDuration(nruns);
+  g_last_col_t2.getTotalDuration(nruns);
+  g_last_col_t3.getTotalDuration(nruns);
+  g_last_col_t4.getTotalDuration(nruns);
+  g_last_col_t5.getTotalDuration(nruns);
 }
 
 
@@ -46,4 +56,9 @@ void reset_times() {
   g_update_omega_hw.resetDuration();
   g_sample_omega_hw.resetDuration();
   g_inv_omega_11_hw.resetDuration();
+  g_last_col_t1.resetDuration();
+  g_last_col_t2.resetDuration();
+  g_last_col_t3.resetDuration();
+  g_last_col_t4.resetDuration();
+  g_last_col_t5.resetDuration();
 }

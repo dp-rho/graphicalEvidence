@@ -38,7 +38,7 @@ arma::vec solve_mu_reduced_hw(
 
 void solve_mu_reduced_hw_in_place(
   const unsigned int, arma::uvec const&, arma::uvec const&,
-  arma::mat const&, arma::rowvec const&
+  arma::mat const&
 );
 
 /* Functions in sample_omega_hw.cpp */
@@ -47,7 +47,7 @@ void sample_omega_hw(
   arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
   arma::cube&, arma::mat const&, arma::mat const&, arma::umat const&,
   std::vector<arma::uvec> const&, std::vector<arma::uvec> const&,
-  arma::mat const&, arma::mat const&
+  arma::mat const&, arma::mat const&, arma::mat&
 );
 
 /* Functions in sample_omega_hw_rmatrix */
@@ -64,7 +64,7 @@ void efficient_inv_omega_11_calc(
 );
 
 void update_sigma_inplace(
-  arma::mat&, arma::mat const&, arma::vec const&, arma::uvec const&,
+  arma::mat&, arma::mat const&, double*, arma::uvec const&,
   const double, const unsigned int, const unsigned int
 );
 
@@ -80,17 +80,41 @@ void initialize_indices(
 
 /* Functions in sample_omega_last_col.cpp */
 void sample_omega_last_col(
+  const unsigned int, const double, const double*, const double, arma::vec&,
+  arma::mat&, arma::mat&, arma::mat&, arma::mat&, std::vector<arma::uvec> const&,
+  std::vector<arma::uvec> const&, arma::umat const&, arma::mat const&,
+  arma::mat const&, arma::mat const&, arma::mat const&
+);
+
+/* Functions in sample_omega_last_col_rmatrix.cpp */
+void sample_omega_last_col_rmatrix(
   const unsigned int, const double, const double*, const double,
-  arma::vec&, arma::mat&, arma::mat&, arma::vec&, arma::vec&,
-  std::vector<arma::uvec> const&, std::vector<arma::uvec> const&,
-  arma::umat const&, arma::mat const&, arma::mat const&, arma::mat const&,
-  arma::mat const&
+  const double, const double, const int, arma::vec&, arma::mat&, arma::mat&,
+  arma::mat&, arma::mat&, arma::mat&, arma::umat const&, arma::mat const&,
+  arma::mat const&, arma::mat const&
+);
+
+/* Functions in mcmc_last_col_rmatrix */
+void last_col_calc_inv_omega_11_full(
+  arma::mat&, arma::mat const&
+);
+
+double calc_gamma_subtractor(
+  arma::vec const&, arma::mat const&
+);
+
+void last_col_prepare_sigma_reduced(
+  arma::mat&, arma::mat const&, arma::vec const&, const double
+);
+
+void update_sigma_last_col(
+  arma::mat&, arma::vec const&, const double
 );
 
 /* Functions in calc_eq_11.cpp  */
 double calc_eq_11(
-  const double, const double, const double, const double,
-  const unsigned int, const unsigned int, arma::vec const&
+  const double, const double, const double, const unsigned int, 
+  arma::vec const&
 );
 
 /* Functions in gigrnd.cpp  */

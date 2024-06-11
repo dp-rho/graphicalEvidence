@@ -23,7 +23,7 @@ G_wishart_last_col_fixed <- function(
   
   # RcppArmadillo implementation
   ans_last_col <- mcmc_last_col(
-    n, burnin, nmc, alpha, p, fixed_last_col, S, scale_matrix, G_mat_adj,
+    n, burnin, nmc, p, alpha, fixed_last_col, S, scale_matrix, G_mat_adj,
     matrix_accumulator_gibbs, post_mean_omega
   )
   
@@ -35,7 +35,7 @@ G_wishart_last_col_fixed <- function(
     g_time_env$mcmc_last_col_calc_time + calc_time
   )
   ######################
-  
+
   return(list(
     MC_average_Equation_11=ans_last_col[[1]],
     start_point_first_gibbs=ans_last_col[[2]],

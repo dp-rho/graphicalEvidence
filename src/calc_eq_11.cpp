@@ -9,20 +9,14 @@
 
 double calc_eq_11(
   const double omega_22_mean,
-  const double s_22,
-  const double scale_mat_22,
-  const double alpha,
-  const unsigned int n,
+  const double shape_param,
+  const double scale_param,
   const unsigned int nmc,
   arma::vec const& gamma_subtractors
 ) {
 
   /* Time profiling */
   g_eq_11_timer.TimerStart();
-  
-  /* Shape and scale parameter for gamma density  */
-  const double scale_param = 2 / (s_22 + scale_mat_22);
-  const double shape_param = alpha + ((double) n / 2) + 1;
 
   /* Iterate through accumulated gamma subtractors and calculate gamma density  */
   double gamma_acc = 0.0;
@@ -30,7 +24,7 @@ double calc_eq_11(
 
     /* Gamma value to check is mean pth row/col of omega minus saved subtractors  */
     double temp_gamma = omega_22_mean - gamma_subtractors[i];
-
+    
     /* Check if temp_gamma is not positive  */
     if (temp_gamma > 0) {
 

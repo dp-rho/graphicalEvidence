@@ -3,7 +3,8 @@
 
 /*
  * Sample Omega using Hao Wang decomposition Wang decomposition MCMC sampling.
- * Updates current reduced omega using last col restricted sampler
+ * Updates current reduced omega using last col restricted sampler, this
+ * function operates only on the G_Wishart prior
  */
 
 void sample_omega_last_col(
@@ -14,8 +15,8 @@ void sample_omega_last_col(
   arma::vec& beta,
   arma::mat& omega_reduced,
   arma::mat& inv_c,
-  arma::vec& ind_noi_data1,
-  arma::vec& ind_noi_data2,
+  arma::mat& inv_omega_11,
+  arma::mat& sigma,
   std::vector<arma::uvec> const& find_which_ones,
   std::vector<arma::uvec> const& find_which_zeros,
   arma::umat const& ind_noi_mat,
@@ -25,87 +26,155 @@ void sample_omega_last_col(
   arma::mat const& last_col_outer
 ) {
 
-  omega_reduced += ((1 / omega_pp) * last_col_outer);
+  /* Tilda parameterization sampling  */
+  omega_reduced -= ((1 / omega_pp) * last_col_outer);
 
-  /* Data vec for reduced (which ones) in sampler */
-  arma::vec reduced_vec;
-  arma::mat inv_c_required;
+  /* Allow selection of all elements besides the ith element  */
+  arma::uvec ind_noi;
 
   /* Iterate through 1 to p_reduced for restricted sampler  */
   for (arma::uword i = 0; i < p_reduced; i++) {
 
-    /* Extract no i indices for ith col */
-    ind_noi_data1 = -(1 / omega_pp) * last_col_outer.submat(
-      ind_noi_mat.col(i), arma::uvec({i})
-    );
-    ind_noi_data2 = -1 * gibbs_mat.submat(ind_noi_mat.col(i), arma::uvec({i}));
+    /* Use existing global memory to avoid constant reallocaiton  */
+    ind_noi = ind_noi_mat.unsafe_col(i);
+
+    /* Get sampled gamma value  */
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[i]);
 
-    /* Update inv_c */
-    inv_c = arma::inv(
-      omega_reduced.submat(ind_noi_mat.col(i), ind_noi_mat.col(i))
-    ) * s_mat.at(i, i) * scale_mat.at(i, i);
+    /* Update inv_omega_11  */
+    // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
+    efficient_inv_omega_11_calc(
+     inv_omega_11, ind_noi, sigma, p_reduced, i
+    );
 
+    /* Initialize beta indices where zeros occur  */
+    for (unsigned int j = 0; j < find_which_zeros[i].n_elem; j++) {
+
+      /* Reduced zero index */
+      const unsigned int which_zero = find_which_zeros[i][j];
+
+      /* Update beta */
+      beta[which_zero] = -(
+        gibbs_mat.at(ind_noi[which_zero], i) +
+        (last_col_outer.at(ind_noi[which_zero], i) / omega_pp)
+      );
+    }
+
+    /* Time profiling */
+    g_last_col_t3.TimerStart();
+
+    /* Number of ones in the adjacency matrix column  */
     const arma::uword reduced_dim = find_which_ones[i].n_elem;
+    int lapack_dim = (int)reduced_dim;
     if (reduced_dim) {
 
-      inv_c_required = inv_c.submat(find_which_ones[i], find_which_ones[i]);
+      /* Calculate inv_c  */
+      inv_c = inv_omega_11 * s_mat.at(i, i) * scale_mat.at(i, i);
+
+      /* Fill global memory with inv_c[which_ones, which_ones]  */
+      int assign_index = 0;
+      for (unsigned int j = 0; j < reduced_dim; j++) {
+        for (unsigned int k = 0; k < reduced_dim; k++) {
+          g_mat1[assign_index++] = inv_c.at(find_which_ones[i][k], find_which_ones[i][j]);
+        }
+      }
 
       if (find_which_zeros[i].n_elem) {
-        beta.elem(find_which_zeros[i]) = (
-          ind_noi_data1.elem(find_which_zeros[i]) +
-          ind_noi_data2.elem(find_which_zeros[i])
-        );
 
-        arma::mat inv_c_not_required = inv_c.submat(
-          find_which_zeros[i], find_which_ones[i]
-        );
+        /* Update g_vec2 to store V[ind_noi, i] + S[ind_noi, i] +                 */
+        /* + Gibbs[reduced_zeros, i].t() * inv_c[reduced_zeros, reduced_ones] +   */
+        /* + col_outer[reduced_zeros, i].t() * inv_c[reduced_zeros, reduced_ones] */
+        for (unsigned int j = 0; j < find_which_ones[i].n_elem; j++) {
 
-        reduced_vec = -solve(
-          inv_c_required,
-          (
-            arma::vec(scale_mat.submat(ind_noi_mat.col(i), arma::uvec({i}))).elem(
-              find_which_ones[i]
-            ) +
-            arma::vec(s_mat.submat(ind_noi_mat.col(i), arma::uvec({i}))).elem(
-              find_which_ones[i]
-            ) +
-            (ind_noi_data2.elem(find_which_zeros[i]).t() * inv_c_not_required).t() +
-            (ind_noi_data1.elem(find_which_zeros[i]).t() * inv_c_not_required).t()
-          )
+          /* Reduced one index  */
+          const unsigned int which_one = ind_noi[find_which_ones[i][j]];
+
+          /* initialize memory with V and S */
+          g_vec2[j] = scale_mat.at(which_one, i) + s_mat.at(which_one, i);
+
+          /* Loop through current row of inv_c[zeros, ones] */
+          double dot1 = 0.0;
+          double dot2 = 0.0;
+          for (unsigned int k = 0; k < find_which_zeros[i].n_elem; k++) {
+            
+            /* Reduced zero index */
+            const unsigned int which_zero = ind_noi[find_which_zeros[i][k]];
+
+            /* Accumulate dot of inv_c_not_required and gibbs/last_col_outer  */
+            dot1 += (-gibbs_mat.at(which_zero, i) * inv_c.at(which_zero, j));
+            dot2 += (-last_col_outer.at(which_zero, i) * inv_c.at(which_zero, j));
+          }
+          dot2 /= omega_pp;
+          g_vec2[j] += (dot1 + dot2);
+        }
+
+        LAPACK_dposv(
+          &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
+      
       }
       else {
-        reduced_vec = -solve(
-          inv_c_required,
-          arma::randn<arma::vec>(reduced_dim)
+        for (unsigned int j = 0; j < reduced_dim; j++) {
+          g_vec2[j] = arma::randn();
+        }
+
+        LAPACK_dposv(
+          &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
       }
-      
-      /* Update beta at indices associated with 1's */
-      reduced_vec += arma::solve(
-        arma::chol(inv_c_required), arma::randn<arma::vec>(reduced_dim)
-      );
-      beta.elem(find_which_ones[i]) = reduced_vec;
 
-    }
-    else {
-      beta = (
-        (-1 * gibbs_mat.submat(ind_noi_mat.col(i), arma::uvec({i}))) +
-        (-1 / omega_pp * last_col_outer.submat(
-          ind_noi_mat.col(i), arma::uvec({i})
-        ))
-      );
-    }
+      /* Assign random normals to g_vec1 to solve for beta ones */
+      for (unsigned int j = 0; j < reduced_dim; j++) {
+        g_vec1[j] = arma::randn();
+      }
 
-    /* Update row and col i using sampled values  */
-    omega_reduced.submat(ind_noi_mat.col(i), arma::uvec({i})) = beta;
-    omega_reduced.submat(arma::uvec({i}), ind_noi_mat.col(i)) = beta.t();
-    omega_reduced.at(i, i) = gamma_sample + arma::dot(beta.t(),
-      inv_c / (s_mat.at(i, i) * scale_mat.at(i, i)) * beta
+      /* Solve chol(inv_c) x = randn(), store result in g_vec1  */
+      cblas_dtrsm(
+        CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim, nrhs, one,
+        g_mat1, lapack_dim, g_vec1, lapack_dim
+      );
+
+      /* Update beta[which_ones] = difference of g_vec1 and g_vec2  */
+      for (unsigned int j = 0; j < reduced_dim; j++) {
+        beta[find_which_ones[i][j]] = g_vec1[j] - g_vec2[j];
+      }
+    } 
+    g_last_col_t3.TimerEnd();
+
+    g_last_col_t2.TimerStart();
+
+    /* Update ith col and row of omega and */
+    /* calculate omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in g_vec1 */
+    double omega_22 = gamma_sample;
+    for (unsigned int j = 0; j < (p_reduced - 1); j++) {
+
+      /* Update the col and row indices excluding the diagonal  */
+      omega_reduced.at(ind_noi[j], i) = beta[j];
+      omega_reduced.at(i, ind_noi[j]) = beta[j];
+
+      /* Store beta.t() * inv_omega_11 in g_vec1  */
+      g_vec1[j] = 0;
+      for (unsigned int k = 0; k < (p_reduced - 1); k++) {
+
+        /* First beta.t() * inv_omega_11[, k] */
+        g_vec1[j] += (beta[k] * inv_omega_11.at(k, j));
+      }
+
+      /* Accumulate beta_omega[j] * beta[j] */
+      omega_22 += (beta[j] * g_vec1[j]);
+    }
+    omega_reduced.at(i, i) = omega_22; 
+    g_last_col_t2.TimerEnd();
+
+    /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
+    /* is still stored in global memory g_vec1 from our previous update of omega    */
+    update_sigma_inplace(
+      sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p_reduced, i
     );
+
   }
 
   /* Update omega reduced with last col outer product */ 
   omega_reduced += ((1 / omega_pp) * last_col_outer);
+
 }

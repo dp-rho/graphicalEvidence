@@ -3,18 +3,17 @@
 
 /*
  * Use Hao Wang decomposition to run an MCMC sampler nmc + burnin times
- * and accumulate omega, mean_vec, and inv_c_required to calculate
- * mc average equation 9 after mcmc sampling is complete.
- * Currently communicates with R through Rcpp interface, will
- * eventually communicate only with other compiled code
+ * and accumulate omega_reduced, gamma_subtractors, and posterior mean of
+ * omega_22 and then use those values to calculate eq. 11 in paper,
+ * this function is called for G_Wishart prior only
  */
  // [[Rcpp::export]]
 List mcmc_last_col(
   const unsigned int n,
   const unsigned int burnin,
   const unsigned int nmc,
-  const unsigned int alpha,
   const unsigned int p,
+  const double alpha,
   NumericVector fixed_last_col_nvec,
   NumericVector s_mat_nvec,
   NumericVector scale_mat_nvec,
@@ -34,22 +33,26 @@ List mcmc_last_col(
   /* Time profiling */
   g_mcmc_last_col_timer.TimerStart();
 
+  /* Sampler with last column fixed relies on p_reduced sampling  */
+  const int p_reduced = p - 1;
+
   /* Set omega_22 gamma parameters  */
   double scale_params[p];
   const double shape_param = alpha + ((double) n / 2) + 1;
   for (unsigned int i = 0; i < p; i++) {
-    scale_params[i] = 2 / (s_mat.at(i, i) + scale_mat.at(i, i));
+    scale_params[i] = 2.0 / (s_mat.at(i, i) + scale_mat.at(i, i));
   }
 
   /* Calculate outer product of last col  */
   arma::mat last_col_outer = fixed_last_col * fixed_last_col.t();
 
-  /* Save pth row and col element of scale mat and covariance mat */
-  const double s_mat_22 = s_mat.at(p - 1, p - 1);
-  const double scale_mat_22 = scale_mat.at(p - 1, p - 1);
+  /* Calculate inital inverse of omega  */
+  arma::mat sigma = arma::inv_sympd(omega);
+
+  /* Use global memory for variables used to update sigma/omega */
+  arma::mat inv_omega_11_full = arma::mat(g_mat1, p - 1, p - 1, false, true);
 
   /* Reduce matrices */
-  const int p_reduced = p - 1;
   omega = omega.submat(0, 0, p_reduced - 1, p_reduced - 1);
   gibbs_mat = gibbs_mat.submat(0, 0, p_reduced - 1, p_reduced - 1);
   g_mat_adj = g_mat_adj.submat(0, 0, p_reduced - 1, p_reduced - 1);
@@ -71,8 +74,7 @@ List mcmc_last_col(
 
   /* Initialize calculation memory  */
   arma::mat inv_c = arma::zeros(p_reduced - 1, p_reduced - 1);
-  arma::vec ind_noi_data1 = arma::zeros(p_reduced - 1);
-  arma::vec ind_noi_data2 = arma::zeros(p_reduced - 1);
+  arma::mat inv_omega_11 = arma::zeros(p_reduced - 1, p_reduced - 1);
   arma::vec beta = arma::zeros(p_reduced - 1);
 
   /* Perform main loop of mcmc sampling */
@@ -80,19 +82,41 @@ List mcmc_last_col(
 
     /* Get random gamma value and calculate omega_22  */
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[p - 1]);
-    // double gamma_sample = extract_rgamma();
-    double omega_22 = gamma_sample + arma::dot(
-      fixed_last_col.t(), arma::solve(omega, fixed_last_col)
+    
+    g_last_col_t4.TimerStart();
+
+    /* Efficient calculation of inv_omega_11_full */
+    last_col_calc_inv_omega_11_full(inv_omega_11_full, sigma);
+
+    /* Calculate gamma_subtractor and omega_22  */
+    double gamma_subtractor = calc_gamma_subtractor(
+      fixed_last_col, inv_omega_11_full
+    );
+    double omega_22 = gamma_subtractor + gamma_sample;
+
+    /* Prepare sigma_reduced for iteration of 1 to p_reduced sampling */
+    /* of omega_reduced, each requiring calculation of inv_omega_11   */
+    last_col_prepare_sigma_reduced(
+      sigma, inv_omega_11_full, fixed_last_col, gamma_sample
     );
 
+    /* Save gamma_subtractor now if burnin is past, this avoids recalculation   */
+    /* of gamma_subtractor in calculation of eq. 11, although it shifts the     */
+    /* the comparison of gamma_subtractors back by one in the iteration process */
+    /* when comparing against posterior mean of omega_22, but this is fine      */
+    if (i >= burnin) {
+      gamma_subtractors[i - burnin] = gamma_subtractor;
+    }
+    g_last_col_t4.TimerEnd();
+
     /* In general case call omega reduced sampler */
+    g_last_col_t1.TimerStart();
     if (p_reduced > 1) {
       sample_omega_last_col(
         p_reduced, shape_param, scale_params, omega_22, beta, omega, inv_c,
-        ind_noi_data1, ind_noi_data2, find_which_ones, find_which_zeros,
-        ind_noi_mat, s_mat, scale_mat, gibbs_mat, last_col_outer
+        inv_omega_11, sigma, find_which_ones, find_which_zeros, ind_noi_mat,
+        s_mat, scale_mat, gibbs_mat, last_col_outer
       );
-
     }
 
     /* In special case where the matrices considered are single elements  */
@@ -103,15 +127,18 @@ List mcmc_last_col(
         fixed_last_col[0] * fixed_last_col[0] / omega_22
       );
     }
+    g_last_col_t1.TimerEnd();
 
+    /* Update sigma's last column and row for next iteration  */
+    update_sigma_last_col(sigma, fixed_last_col, omega_22);
+
+    g_last_col_t4.TimerStart();
     /* Save results if burnin is complete */
     if (i >= burnin) {
       omega_22_acc += omega_22;
       omega_reduced_acc += omega;
-      gamma_subtractors[i - burnin] = arma::dot(
-        fixed_last_col.t(), arma::solve(omega, fixed_last_col)
-      );
     }
+    g_last_col_t4.TimerEnd();
   }
 
   /* Get posterior means of sampled values */
@@ -119,8 +146,7 @@ List mcmc_last_col(
   omega_reduced_acc /= nmc;
 
   double mc_avg_eq_11 = calc_eq_11(
-    omega_22_acc, s_mat_22, scale_mat_22, alpha, n, nmc, 
-    gamma_subtractors
+    omega_22_acc, shape_param, scale_params[p - 1], nmc, gamma_subtractors
   );
 
   List z = List::create(
@@ -132,4 +158,151 @@ List mcmc_last_col(
 
   return z;
 
+}
+
+
+/* 
+ * Calculates the full p - 1 by p - 1 inv_omega_11_full in place using
+ * O(n^2) operations, given the return memory and sigma (inverse of omega).
+ * This function is called once prior to iterating through 1 to p_reduced
+ * to sample each column of omega
+ */
+
+void last_col_calc_inv_omega_11_full(
+  arma::mat& inv_omega_11_full,
+  arma::mat const& sigma
+) {
+
+  unsigned int p = sigma.n_rows;
+
+  // arma::cout << "initial sigma: \n" << sigma << arma::endl;
+
+  /* Iterate over cols  */
+  for (unsigned int i = 0; i < (p - 1); i++) {
+
+    /* Iterate over rows  */
+    for (unsigned int j = 0; j < (p - 1); j++) {
+
+      inv_omega_11_full.at(j, i) = sigma.at(j, i) - (
+        sigma.at(j, p - 1) * sigma.at(i, p - 1) /
+        sigma.at(p - 1, p - 1)
+      );
+    }
+  }
+}
+
+
+/*
+ * Calculate gamma_subtractor using global memory with formula
+ * gamma_subtractor = t(fixed_last_col) %*% inv_omega_11 %*% fixed_last_col
+ */
+
+double calc_gamma_subtractor(
+  arma::vec const& fixed_last_col,
+  arma::mat const& inv_omega_11_full
+) {
+
+  const unsigned int p_reduced = fixed_last_col.n_elem;
+  double gamma_subtractor = 0;
+  for (unsigned int j = 0; j < p_reduced; j++) {
+
+    /* Store fixed_last_col.t() * inv_omega_11_full in g_vec1  */
+    g_vec1[j] = 0;
+    for (unsigned int k = 0; k < p_reduced; k++) {
+
+      /* First fixed_last_col.t() * inv_omega_11_full[, k] */
+      g_vec1[j] += (fixed_last_col[k] * inv_omega_11_full.at(k, j));
+    }
+
+    /* Accumulate fixed_last_col_omega[j] * fixed_last_col[j] */
+    gamma_subtractor += (fixed_last_col[j] * g_vec1[j]);
+  }
+
+  return gamma_subtractor;
+}
+
+
+/*
+ * Prepares reduced sigma such that at each iteration of the last col
+ * fixed sampler, inv_omega_11 can be calculated from sigma_reduced
+ * (where sigma_reduced is just sigma from 0 to p_reduced) according to
+ * x = inv_omega_11_full %*% fixed_last col
+ * sigma_reduced = inv_omega_11_full + x %*% t(x) / gamma_param
+ */
+
+void last_col_prepare_sigma_reduced(
+  arma::mat& sigma,
+  arma::mat const& inv_omega_11_full,
+  arma::vec const& fixed_last_col,
+  const double gamma_param
+) {
+
+  unsigned int p_reduced = fixed_last_col.n_elem;
+
+  /* Calculate inv_omega_11_full %*% fixed_last_col */
+  for (unsigned int i = 0; i < p_reduced; i++) {
+    double sum = 0.0;
+    for (unsigned int j = 0; j < p_reduced; j++) {
+      sum += (inv_omega_11_full.at(i, j) * fixed_last_col[j]);
+    }
+    g_vec1[i] = sum;
+  }
+
+   
+  // arma::cout << "fast sigma update temp: " << arma::rowvec(g_vec1, p_reduced, false);
+  /* arma::cout << "direct sigma update temp: " << fixed_last_col.t() * inv_omega_11_full << arma::endl;
+  arma::rowvec temp = fixed_last_col.t() * inv_omega_11_full;
+  arma::mat ddirect = inv_omega_11_full + (temp.t() * temp) / gamma_param;
+  arma::cout << "fast and direct sigma pre loop: \n" << ddirect << arma::endl; */
+  /* Update sigma from indices 0 to p_reduced */
+
+  /* Iterate over cols  */
+  for (unsigned int i = 0; i < p_reduced; i++) {
+
+    /* Iterate over rows  */
+    for (unsigned int j = 0; j < p_reduced; j++) {
+
+      sigma.at(j, i) = inv_omega_11_full.at(j, i) + (
+        g_vec1[j] * g_vec1[i] / gamma_param
+      );
+    }
+  }
+}
+
+
+/* 
+ * Updates the last column and row of sigma after completing sampling 
+ * iterations from 1 to p_reduced in the fixed last col sampler, 
+ * note that sigma_reduced is already updated in the sampling process
+ */
+
+void update_sigma_last_col(
+  arma::mat& sigma,
+  arma::vec const& fixed_last_col,
+  const double omega_pp
+) {
+
+  const unsigned int p = sigma.n_rows;
+
+  /* Initialize sigma_22 =                       */
+  /* 1 / omega_pp + (1 / omega_pp)^2 *           */
+  /* last_col.t() %*% sigma_reduced %*% last_col */
+  sigma.at(p - 1, p - 1) = 1 / omega_pp;
+
+  /* Update sigma_*/
+  for (unsigned int i = 0; i < (p - 1); i++) {
+
+    /* Update sigma_12 = -sigma_reduced %*% last_col / omega_pp in place  */
+    sigma.at(i, p - 1) = 0;
+    for (unsigned int j = 0; j < (p - 1); j++) {
+      sigma.at(i, p - 1) += (sigma.at(i, j) * fixed_last_col[j] / omega_pp);
+    }
+
+    /* Accumulate sigma_22  */
+    sigma.at(p - 1, p - 1) += (sigma.at(i, p - 1) * fixed_last_col[i] / omega_pp);
+
+    /* Update sigma_12 and sigma_21 */
+    sigma.at(i, p - 1) *= -1;
+    sigma.at(p - 1, i) = sigma.at(i, p - 1);
+  }
 }

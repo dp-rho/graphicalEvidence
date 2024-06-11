@@ -29,8 +29,12 @@ mcmc_hw_rmatrix <- function(n, burnin, nmc, p, prior, dof, lambda, s_mat_nvec, g
     .Call(`_graphicalEvidence_mcmc_hw_rmatrix`, n, burnin, nmc, p, prior, dof, lambda, s_mat_nvec, gibbs_mat_nvec)
 }
 
-mcmc_last_col <- function(n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec) {
-    .Call(`_graphicalEvidence_mcmc_last_col`, n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec)
+mcmc_last_col <- function(n, burnin, nmc, p, alpha, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec) {
+    .Call(`_graphicalEvidence_mcmc_last_col`, n, burnin, nmc, p, alpha, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec)
+}
+
+mcmc_last_col_rmatrix <- function(n, burnin, nmc, p, dof, lambda, prior, fixed_last_col_nvec, s_mat_nvec, tau_mat_nvec, gibbs_mat_nvec, post_mean_omega_nvec) {
+    .Call(`_graphicalEvidence_mcmc_last_col_rmatrix`, n, burnin, nmc, p, dof, lambda, prior, fixed_last_col_nvec, s_mat_nvec, tau_mat_nvec, gibbs_mat_nvec, post_mean_omega_nvec)
 }
 
 set_cores <- function(cores) {

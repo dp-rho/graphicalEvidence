@@ -68,7 +68,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // mcmc_hw
-List mcmc_hw(int n, int burnin, int nmc, int alpha, int p, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector init_gibbs_nvec);
+List mcmc_hw(int n, int burnin, int nmc, double alpha, int p, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector init_gibbs_nvec);
 RcppExport SEXP _graphicalEvidence_mcmc_hw(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP s_mat_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP g_mat_adj_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP init_gibbs_nvecSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -76,7 +76,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
     Rcpp::traits::input_parameter< int >::type nmc(nmcSEXP);
-    Rcpp::traits::input_parameter< int >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type scale_mat_nvec(scale_mat_nvecSEXP);
@@ -88,7 +88,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // mcmc_hw_rmatrix
-List mcmc_hw_rmatrix(int n, int burnin, int nmc, int p, int prior, int dof, double lambda, NumericVector s_mat_nvec, NumericVector gibbs_mat_nvec);
+List mcmc_hw_rmatrix(int n, int burnin, int nmc, int p, int prior, double dof, double lambda, NumericVector s_mat_nvec, NumericVector gibbs_mat_nvec);
 RcppExport SEXP _graphicalEvidence_mcmc_hw_rmatrix(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP pSEXP, SEXP priorSEXP, SEXP dofSEXP, SEXP lambdaSEXP, SEXP s_mat_nvecSEXP, SEXP gibbs_mat_nvecSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -98,7 +98,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nmc(nmcSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type prior(priorSEXP);
-    Rcpp::traits::input_parameter< int >::type dof(dofSEXP);
+    Rcpp::traits::input_parameter< double >::type dof(dofSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
@@ -107,23 +107,45 @@ BEGIN_RCPP
 END_RCPP
 }
 // mcmc_last_col
-List mcmc_last_col(const unsigned int n, const unsigned int burnin, const unsigned int nmc, const unsigned int alpha, const unsigned int p, NumericVector fixed_last_col_nvec, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector post_mean_omega_nvec);
-RcppExport SEXP _graphicalEvidence_mcmc_last_col(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP fixed_last_col_nvecSEXP, SEXP s_mat_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP g_mat_adj_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP post_mean_omega_nvecSEXP) {
+List mcmc_last_col(const unsigned int n, const unsigned int burnin, const unsigned int nmc, const unsigned int p, const double alpha, NumericVector fixed_last_col_nvec, NumericVector s_mat_nvec, NumericVector scale_mat_nvec, NumericVector g_mat_adj_nvec, NumericVector gibbs_mat_nvec, NumericVector post_mean_omega_nvec);
+RcppExport SEXP _graphicalEvidence_mcmc_last_col(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP pSEXP, SEXP alphaSEXP, SEXP fixed_last_col_nvecSEXP, SEXP s_mat_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP g_mat_adj_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP post_mean_omega_nvecSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const unsigned int >::type n(nSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type burnin(burninSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type nmc(nmcSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type fixed_last_col_nvec(fixed_last_col_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type scale_mat_nvec(scale_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type g_mat_adj_nvec(g_mat_adj_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type post_mean_omega_nvec(post_mean_omega_nvecSEXP);
-    rcpp_result_gen = Rcpp::wrap(mcmc_last_col(n, burnin, nmc, alpha, p, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec));
+    rcpp_result_gen = Rcpp::wrap(mcmc_last_col(n, burnin, nmc, p, alpha, fixed_last_col_nvec, s_mat_nvec, scale_mat_nvec, g_mat_adj_nvec, gibbs_mat_nvec, post_mean_omega_nvec));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mcmc_last_col_rmatrix
+List mcmc_last_col_rmatrix(const unsigned int n, const unsigned int burnin, const unsigned int nmc, const unsigned int p, const double dof, const double lambda, const int prior, NumericVector fixed_last_col_nvec, NumericVector s_mat_nvec, NumericVector tau_mat_nvec, NumericVector gibbs_mat_nvec, NumericVector post_mean_omega_nvec);
+RcppExport SEXP _graphicalEvidence_mcmc_last_col_rmatrix(SEXP nSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP pSEXP, SEXP dofSEXP, SEXP lambdaSEXP, SEXP priorSEXP, SEXP fixed_last_col_nvecSEXP, SEXP s_mat_nvecSEXP, SEXP tau_mat_nvecSEXP, SEXP gibbs_mat_nvecSEXP, SEXP post_mean_omega_nvecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type nmc(nmcSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const double >::type dof(dofSEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const int >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type fixed_last_col_nvec(fixed_last_col_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type s_mat_nvec(s_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type tau_mat_nvec(tau_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type gibbs_mat_nvec(gibbs_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type post_mean_omega_nvec(post_mean_omega_nvecSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcmc_last_col_rmatrix(n, burnin, nmc, p, dof, lambda, prior, fixed_last_col_nvec, s_mat_nvec, tau_mat_nvec, gibbs_mat_nvec, post_mean_omega_nvec));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -157,6 +179,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_mcmc_hw", (DL_FUNC) &_graphicalEvidence_mcmc_hw, 10},
     {"_graphicalEvidence_mcmc_hw_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_hw_rmatrix, 9},
     {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},
+    {"_graphicalEvidence_mcmc_last_col_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_last_col_rmatrix, 12},
     {"_graphicalEvidence_set_cores", (DL_FUNC) &_graphicalEvidence_set_cores, 1},
     {"_graphicalEvidence_set_seed", (DL_FUNC) &_graphicalEvidence_set_seed, 1},
     {NULL, NULL, 0}

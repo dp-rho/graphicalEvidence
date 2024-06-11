@@ -82,8 +82,5 @@ prior_sampling_G_Wishart <- function(
     }
   }
   
-  # Why do we save nmc_prior iterations but only return the last?
-  # This is not a huge deal as the number of iterations are quite small but
-  # still area for optimization
   return(omega_save[, , nmc_prior])
 }

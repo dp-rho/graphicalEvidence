@@ -13,13 +13,6 @@ graphical_evidence_G_Wishart <- function(
   G
 ) {
   
-  # Call to Rcpp function should be here:
-  # compiled_G_Wishart(
-  #   xx, S, n, p, burnin, nmc, alpha, G, V
-  # )
-  
-  # Interpreted code implementation
-  
   # Initialize storage locations
   log_ratio_of_liklelihoods <- rep(0, p)
   
@@ -49,7 +42,7 @@ graphical_evidence_G_Wishart <- function(
   for (num_G_Wishart in 1:p) {
     
     if (num_G_Wishart <= (p - 1)) {
-      # cat(paste0(num_G_Wishart, ' th num_G_Wishart\n'))
+      # cat(paste0(num_G_Wishart, 'th num_G_Wishart\n'))
       
       # for every iteration we need smaller and smaller blocks of
       # the data matrix xx. When num_G_Wishart = 1, we need the entire
@@ -205,7 +198,8 @@ graphical_evidence_G_Wishart <- function(
         
         GIG_b <- sum(diag_V_mat_required * (vec_accumulator_21_required^2))
         
-        if (GIG_b == 0) {
+        # Changed to treat any value below machine precision as 0
+        if (abs(GIG_b) < .Machine$double.eps) {
           log_prior_density_scalar_gamma[num_G_Wishart] <- (
             log(dgamma(
               post_mean_omega_22, alpha + (sum(which_ones) / 2) + 1, 
@@ -222,7 +216,6 @@ graphical_evidence_G_Wishart <- function(
             0.5 * (GIG_a * post_mean_omega_22 + (GIG_b / post_mean_omega_22))
           )
         }
-        
       }
       
       log_prior_density[num_G_Wishart] <- (
@@ -246,8 +239,7 @@ graphical_evidence_G_Wishart <- function(
       # remaining first column, it's like
       # imposing a univariate G-wishart prior on the precision of a
       # univariate normal random variable
-      
-      # xx_reduced <- xx[, permutation_order[1]]
+
       xx_reduced <- xx[, 1]
       S_reduced <- t(xx_reduced) %*% xx_reduced
       p_reduced <- 1

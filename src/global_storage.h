@@ -6,8 +6,11 @@
 #define GHS (2)
 #define MAX_DIM (100)
 
-/* Global info storage for manual LAPACK calls  */
+/* Global info storage/args for manual LAPACK/BLAS calls  */
 extern int info_int;
+extern char uplo;
+extern double one;
+extern int nrhs;
 
 /* Global static storage */
 extern int g_ipv[MAX_DIM];

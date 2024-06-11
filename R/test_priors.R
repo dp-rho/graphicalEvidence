@@ -107,9 +107,10 @@ test_G_Wishart <- function(num_runs) {
   
   # Estimated mean (sd)
   cat(paste0("ans = ", estimated_marginal_store$mean, " (", 
-             sqrt(estimated_marginal_store$var), ")"))
+             sqrt(estimated_marginal_store$var), ")\n"))
 
   hist(estimated_marginal_store$results, breaks=40)
+  return(estimated_marginal_store)
 }
 
 test_BGL <- function(num_runs) {
@@ -139,8 +140,8 @@ test_BGL <- function(num_runs) {
   
   # Call top level function
   estimated_marginal_store <- evidence(
-    xx=params$X_mat, burnin=1e3, nmc=5e3, prior_name='GHS', 
-    run=num_runs, lambda=140
+    xx=params$X_mat, burnin=1e3, nmc=5e3, prior_name='BGL', 
+    run=num_runs, lambda=1
   )
   
   # Cumulative execution time in R program
@@ -160,9 +161,10 @@ test_BGL <- function(num_runs) {
   
   # Estimated mean (sd)
   cat(paste0("ans = ", estimated_marginal_store$mean, " (", 
-             sqrt(estimated_marginal_store$var), ")"))
+             sqrt(estimated_marginal_store$var), ")\n"))
   
   hist(estimated_marginal_store$results, breaks=40)
+  return(estimated_marginal_store)
 }
 
 test_GHS <- function(num_runs) {
@@ -213,9 +215,10 @@ test_GHS <- function(num_runs) {
   
   # Estimated mean (sd)
   cat(paste0("ans = ", estimated_marginal_store$mean, " (", 
-             sqrt(estimated_marginal_store$var), ")"))
+             sqrt(estimated_marginal_store$var), ")\n"))
   
   hist(estimated_marginal_store$results, breaks=40)
+  return(estimated_marginal_store)
 }
 
 test_Wishart <- function(num_runs) {
@@ -251,8 +254,9 @@ test_Wishart <- function(num_runs) {
   
   # Estimated mean (sd)
   cat(paste0("ans = ", estimated_marginal_store$mean, " (", 
-             sqrt(estimated_marginal_store$var), ")"))
+             sqrt(estimated_marginal_store$var), ")\n"))
   
   hist(estimated_marginal_store$results, breaks=40)
+  return(estimated_marginal_store)
 }
 

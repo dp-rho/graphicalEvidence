@@ -73,6 +73,7 @@ evidence <- function(
         xx_perm, S, n, p, burnin, nmc, alpha, V_perm, G_perm
       )
     )
+    cat("done with run", i, '\n')
   }
   
   # Filter out infinite and NA values from results

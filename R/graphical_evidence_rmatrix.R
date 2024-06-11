@@ -122,7 +122,7 @@ graphical_evidence_rmatrix <- function(
         # To evaluate log f(y_1) or the last row in the telescopic sum. Here
         # we compute I_1 and IV_1 only. II_1=0 because no further columns of the
         # data are left and III_1 is taken care of the joint prior evaluation
-        gamma_samples <- rgamma_compiled(
+        gamma_samples <- rgamma(
           nmc, shape, 1 / scale
         )
         gamma_mean <- mean(gamma_samples)
