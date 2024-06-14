@@ -32,6 +32,11 @@ void sample_omega_last_col(
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
 
+  /* TEMP */
+  arma::vec sol1;
+  arma::mat mat1;
+  arma::vec sol2;
+
   /* Iterate through 1 to p_reduced for restricted sampler  */
   for (arma::uword i = 0; i < p_reduced; i++) {
 
@@ -43,9 +48,11 @@ void sample_omega_last_col(
 
     /* Update inv_omega_11  */
     // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
+    g_last_col_t1.TimerStart();
     efficient_inv_omega_11_calc(
      inv_omega_11, ind_noi, sigma, p_reduced, i
     );
+    g_last_col_t1.TimerEnd();
 
     /* Initialize beta indices where zeros occur  */
     for (unsigned int j = 0; j < find_which_zeros[i].n_elem; j++) {
@@ -168,9 +175,11 @@ void sample_omega_last_col(
 
     /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
     /* is still stored in global memory g_vec1 from our previous update of omega    */
+    g_last_col_t1.TimerStart();
     update_sigma_inplace(
       sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p_reduced, i
     );
+    g_last_col_t1.TimerEnd();
 
   }
 

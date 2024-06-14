@@ -39,6 +39,12 @@ List mcmc_last_col_rmatrix(
   /* Sampler with last column fixed relies on p_reduced sampling  */
   const int p_reduced = p - 1;
 
+  /* Calculate inital inverse of omega  */
+  arma::mat sigma = arma::inv_sympd(omega);
+
+  /* Use global memory for variables used to update sigma/omega */
+  arma::mat inv_omega_11_full = arma::mat(g_mat1, p - 1, p - 1, false, true);
+
   /* Set gamma parameters and calculation memory dependent on prior,  */
   /* and reduce matrices to p_reduced dim where needed                */  
   double scale_params[p];
@@ -121,28 +127,28 @@ List mcmc_last_col_rmatrix(
     /* Copy omega and fixed_last_col to global memory for efficient call to */
     /* t(fixed_last_col) %*% solve(omega, fixed_last_col)                   */
     g_last_col_t4.TimerStart();
-    memcpy(g_mat1, omega.memptr(), sizeof(double) * p_reduced * p_reduced);
-    memcpy(g_vec1, fixed_last_col.memptr(), sizeof(double) * p_reduced);
 
-    /* Solve omega x = fixed_last_col */
-    LAPACK_dposv(
-      &uplo, &p_reduced, &nrhs, g_mat1, &p_reduced, g_vec1, &p_reduced, &info_int
+    /* Efficient calculation of inv_omega_11_full */
+    last_col_calc_inv_omega_11_full(inv_omega_11_full, sigma);
+
+    /* Calculate gamma_subtractor and omega_22  */
+    double gamma_subtractor = calc_gamma_subtractor(
+      fixed_last_col, inv_omega_11_full
     );
+    double omega_22 = gamma_subtractor + gamma_sample;
 
-    /* Calculate omega_22 = gamma_sample + fixed_last_col %*% x */
-    double omega_22 = gamma_sample;
-    for (unsigned int j = 0; j < (unsigned int)p_reduced; j++) {
-      omega_22 += (fixed_last_col[j] * g_vec1[j]);
-    }
-
-    // arma::cout << "compiled omega_22: " << omega_22 << arma::endl;
+    /* Prepare sigma_reduced for iteration of 1 to p_reduced sampling */
+    /* of omega_reduced, each requiring calculation of inv_omega_11   */
+    last_col_prepare_sigma_reduced(
+      sigma, inv_omega_11_full, fixed_last_col, gamma_sample
+    );
 
     /* Save gamma_subtractor now if burnin is past, this avoids recalculation   */
     /* of gamma_subtractor in calculation of eq. 11, although it shifts the     */
     /* the comparison of gamma_subtractors back by one in the iteration process */
     /* when comparing against posterior mean of omega_22, but this is fine      */
     if (i >= burnin) {
-      gamma_subtractors[i - burnin] = omega_22 - gamma_sample;
+      gamma_subtractors[i - burnin] = gamma_subtractor;
     }
     g_last_col_t4.TimerEnd();
 
@@ -151,7 +157,7 @@ List mcmc_last_col_rmatrix(
     if (p_reduced > 1) {
       sample_omega_last_col_rmatrix(
         p_reduced, shape_param, scale_params, omega_22, lambda, dof, prior,
-        beta, omega, inv_c, inv_omega_11, tau, nu, ind_noi_mat, s_mat,
+        beta, omega, inv_c, inv_omega_11, sigma, tau, nu, ind_noi_mat, s_mat,
         gibbs_mat, last_col_outer
       );
     }
@@ -167,19 +173,20 @@ List mcmc_last_col_rmatrix(
     g_last_col_t1.TimerEnd();
 
     g_last_col_t4.TimerStart();
+    /* Update sigma's last column and row for next iteration  */
+    update_sigma_last_col(sigma, fixed_last_col, omega_22);
+    g_last_col_t4.TimerEnd();
+
     /* Save results if burnin is complete */
     if (i >= burnin) {
       omega_22_acc += omega_22;
       omega_reduced_acc += omega;
     }
-    g_last_col_t4.TimerEnd();
   }
 
   /* Get posterior means of sampled values */
   omega_22_acc /= nmc;
   omega_reduced_acc /= nmc;
-
-  // arma::cout << "post mean omega 22 " << omega_22_acc << arma::endl;
 
   double mc_avg_eq_11 = calc_eq_11(
     omega_22_acc, shape_param, scale_params[p - 1], nmc, gamma_subtractors

@@ -10,7 +10,11 @@ GammaSampler g_rgamma;
  */
 
 double gamma_density(const double x, const double shape, const double scale) {
-  return pow(x, shape - 1) * exp(-x / scale) / (pow(scale, shape) * tgamma(shape));
+  //return pow(x, shape - 1) * exp(-x / scale) / (pow(scale, shape) * tgamma(shape));
+  double log_density = (
+    (shape - 1) * log(x) - (x / scale) - shape * log(scale) - lgamma(shape)
+  );
+  return exp(log_density);
 }
 
 

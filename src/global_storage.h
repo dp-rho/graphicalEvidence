@@ -6,6 +6,9 @@
 #define GHS (2)
 #define MAX_DIM (100)
 
+/* Parallization sizes  */
+#define PARALLEL_MAT_DIM (150)
+
 /* Global info storage/args for manual LAPACK/BLAS calls  */
 extern int info_int;
 extern char uplo;

@@ -110,7 +110,6 @@ List mcmc_last_col(
     g_last_col_t4.TimerEnd();
 
     /* In general case call omega reduced sampler */
-    g_last_col_t1.TimerStart();
     if (p_reduced > 1) {
       sample_omega_last_col(
         p_reduced, shape_param, scale_params, omega_22, beta, omega, inv_c,
@@ -127,18 +126,17 @@ List mcmc_last_col(
         fixed_last_col[0] * fixed_last_col[0] / omega_22
       );
     }
-    g_last_col_t1.TimerEnd();
-
-    /* Update sigma's last column and row for next iteration  */
-    update_sigma_last_col(sigma, fixed_last_col, omega_22);
 
     g_last_col_t4.TimerStart();
+    /* Update sigma's last column and row for next iteration  */
+    update_sigma_last_col(sigma, fixed_last_col, omega_22);
+    g_last_col_t4.TimerEnd();
+
     /* Save results if burnin is complete */
     if (i >= burnin) {
       omega_22_acc += omega_22;
       omega_reduced_acc += omega;
     }
-    g_last_col_t4.TimerEnd();
   }
 
   /* Get posterior means of sampled values */

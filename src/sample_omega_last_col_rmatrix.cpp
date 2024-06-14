@@ -19,6 +19,7 @@ void sample_omega_last_col_rmatrix(
   arma::mat& omega_reduced,
   arma::mat& inv_c,
   arma::mat& inv_omega_11,
+  arma::mat& sigma,
   arma::mat& tau,
   arma::mat& nu,
   arma::umat const& ind_noi_mat,
@@ -52,11 +53,14 @@ void sample_omega_last_col_rmatrix(
     /* Get sampled gamma value  */
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[i]);
     // double gamma_sample = extract_rgamma();
-    // arma::cout << i << "th gamma compiled: \n" << gamma_sample << arma::endl;
 
     /* Update inv_omega_11  */
-    inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
-    // arma::cout << "inv omega 11 compiled: \n" << inv_omega_11 << arma::endl;
+    // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
+    g_last_col_t1.TimerStart();
+    efficient_inv_omega_11_calc(
+      inv_omega_11, ind_noi, sigma, p_reduced, i
+    );
+    g_last_col_t1.TimerEnd();
 
     /* Dependent on prior, intialize solve_for in g_vec2*/
     
@@ -139,8 +143,6 @@ void sample_omega_last_col_rmatrix(
     /* Update beta  */
     beta = -solve_for + flex_mem;
 
-    // arma::cout << "compiled beta:\n " << beta << arma::endl;
-
     /* Update ith col and row of omega and calculate                          */
     /* omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in flex_mem */
     double omega_22 = gamma_sample;
@@ -163,7 +165,6 @@ void sample_omega_last_col_rmatrix(
     }
     omega_reduced.at(i, i) = omega_22;
 
-    // arma::cout << "compiled omega reduced: \n" << omega_reduced << arma::endl;
     /* Conditional on prior, update sampling memory */
     
     /* Wishart case */
@@ -211,11 +212,16 @@ void sample_omega_last_col_rmatrix(
         nu.at(i, ind_noi[j]) = cur_nu;
       }
 
-      // arma::cout << "compiled tau reduced: \n" << tau << arma::endl;
-      // arma::cout << "compiled nu reduced: \n" << nu << arma::endl;
-
       g_update_omega_hw.TimerEnd();
     }
+
+    /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
+    /* is still stored in global memory g_vec1 from our previous update of omega    */
+    g_last_col_t1.TimerStart();
+    update_sigma_inplace(
+      sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p_reduced, i
+    );
+    g_last_col_t1.TimerEnd();
 
   }
 

@@ -24,7 +24,7 @@ double calc_eq_11(
 
     /* Gamma value to check is mean pth row/col of omega minus saved subtractors  */
     double temp_gamma = omega_22_mean - gamma_subtractors[i];
-    
+
     /* Check if temp_gamma is not positive  */
     if (temp_gamma > 0) {
 

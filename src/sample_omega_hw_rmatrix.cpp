@@ -61,11 +61,14 @@ void sample_omega_hw_rmatrix(
     const double gamma_param = g_rgamma.GetSample(shape, scale_vec[i]);
     // const double gamma_param = extract_rgamma();
 
+    /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
+    g_inv_omega_11_hw.TimerStart();
+    efficient_inv_omega_11_calc(inv_omega_11, ind_noi, cur_sigma, p, i);
+    g_inv_omega_11_hw.TimerEnd();
+
     /* Wishart case */
     if (prior == WISHART) {
 
-      /* Inverse of omega excluding row i and col i is solved directly  */
-      inv_omega_11 = arma::inv(omega.submat(ind_noi, ind_noi));
       inv_c = (s_mat.at(i, i) + 1) * inv_omega_11;
       
       /* Solve for vector is just S_21 in Wishart  */
@@ -77,14 +80,6 @@ void sample_omega_hw_rmatrix(
 
     /* BGL case */
     else if (prior == BGL) {
-
-      /* Time profiling */
-      g_inv_omega_11_hw.TimerStart();
-
-      /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
-      efficient_inv_omega_11_calc(inv_omega_11, ind_noi, cur_sigma, p, i);
-
-      g_inv_omega_11_hw.TimerEnd();
 
       inv_c = inv_omega_11 * (s_mat.at(i, i) + lambda);
       for (unsigned int j = 0; j < (p - 1); j++) {
@@ -102,12 +97,6 @@ void sample_omega_hw_rmatrix(
     /* GHS case */
     else if (prior == GHS) {
       
-      /* Time profiling */
-      g_inv_omega_11_hw.TimerStart();
-
-      /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
-      efficient_inv_omega_11_calc(inv_omega_11, ind_noi, cur_sigma, p, i);
-
       inv_c = inv_omega_11 * (s_mat.at(i, i) + (1 / lambda));
       for (unsigned int j = 0; j < (p - 1); j++) {
 
@@ -119,8 +108,6 @@ void sample_omega_hw_rmatrix(
           gibbs_mat.at(ind_noi[j], i) / (tau.at(ind_noi[j], i) * lambda_sq)
         );
       }
-
-      g_inv_omega_11_hw.TimerEnd();
 
     }
 
@@ -171,6 +158,13 @@ void sample_omega_hw_rmatrix(
 
     g_sample_omega_hw.TimerEnd();
 
+    /* Update sigma */
+    g_mu_reduced3_hw.TimerStart();
+    update_sigma_inplace(
+      cur_sigma, inv_omega_11, flex_mem.memptr(), ind_noi, gamma_param, p, i
+    );
+    g_mu_reduced3_hw.TimerEnd();
+    
     /* Update sampling parameters for next iteration in prior specific method */
     
     /* Wishart case */
@@ -180,14 +174,6 @@ void sample_omega_hw_rmatrix(
 
     /* BGL case */
     else if (prior == BGL) {
-      g_mu_reduced3_hw.TimerStart();
-      /* Update sigma */
-      update_sigma_inplace(
-        cur_sigma, inv_omega_11, flex_mem.memptr(), ind_noi, gamma_param, p, i
-      );
-      g_mu_reduced3_hw.TimerEnd();
-      
-
       g_update_omega_hw.TimerStart();
 
       /* Calculate a_gig_tau and resuse variable to sample tau_12 */
@@ -204,12 +190,6 @@ void sample_omega_hw_rmatrix(
 
     /* GHS case */
     else if (prior == GHS) {
-      g_mu_reduced3_hw.TimerStart();
-      /* Update sigma */
-      update_sigma_inplace(
-        cur_sigma, inv_omega_11, flex_mem.memptr(), ind_noi, gamma_param, p, i
-      );
-      g_mu_reduced3_hw.TimerEnd();
 
       g_update_omega_hw.TimerStart();
       /* Sample tau_12 and nu_12 */
@@ -267,7 +247,7 @@ void efficient_inv_omega_11_calc(
         sigma.at(ith, ith)
       );
     }
-  }
+  } 
 }
 
 

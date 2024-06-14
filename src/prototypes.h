@@ -88,8 +88,8 @@ void sample_omega_last_col(
 
 /* Functions in sample_omega_last_col_rmatrix.cpp */
 void sample_omega_last_col_rmatrix(
-  const unsigned int, const double, const double*, const double,
-  const double, const double, const int, arma::vec&, arma::mat&, arma::mat&,
+  const unsigned int, const double, const double*, const double, const double,
+  const double, const int, arma::vec&, arma::mat&, arma::mat&, arma::mat&,
   arma::mat&, arma::mat&, arma::mat&, arma::umat const&, arma::mat const&,
   arma::mat const&, arma::mat const&
 );

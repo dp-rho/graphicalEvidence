@@ -42,7 +42,7 @@ graphical_evidence_G_Wishart <- function(
   for (num_G_Wishart in 1:p) {
     
     if (num_G_Wishart <= (p - 1)) {
-      # cat(paste0(num_G_Wishart, 'th num_G_Wishart\n'))
+      cat(paste0(num_G_Wishart, 'th num_G_Wishart\n'))
       
       # for every iteration we need smaller and smaller blocks of
       # the data matrix xx. When num_G_Wishart = 1, we need the entire
@@ -198,8 +198,8 @@ graphical_evidence_G_Wishart <- function(
         
         GIG_b <- sum(diag_V_mat_required * (vec_accumulator_21_required^2))
         
-        # Changed to treat any value below machine precision as 0
-        if (abs(GIG_b) < .Machine$double.eps) {
+        # Treat any value below machine precision as 0
+        if (abs(GIG_b)^2 < .Machine$double.eps) {
           log_prior_density_scalar_gamma[num_G_Wishart] <- (
             log(dgamma(
               post_mean_omega_22, alpha + (sum(which_ones) / 2) + 1, 

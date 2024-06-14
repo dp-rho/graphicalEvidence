@@ -1,5 +1,6 @@
 /* Class for generating a gamma sample with input shape and scale */
 
+
 class GammaSampler {
 public:
   GammaSampler()
