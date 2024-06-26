@@ -44,6 +44,9 @@ void in_place_solve_mu_reduced(
   LAPACK_dposv(
     &uplo, &dim, &nrhs, g_mat1, &dim, g_vec2, &dim, &info_int
   );
+  if (info_int > 0) {
+    arma::cout << "LAPACK dposv failed" << arma::endl;
+  }
 
   /* Result has to be multiplied by -1  */
   for (unsigned int i = 0; i < (unsigned int) dim; i++) {

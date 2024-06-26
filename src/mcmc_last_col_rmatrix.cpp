@@ -130,6 +130,7 @@ List mcmc_last_col_rmatrix(
 
     /* Efficient calculation of inv_omega_11_full */
     last_col_calc_inv_omega_11_full(inv_omega_11_full, sigma);
+    // inv_omega_11_full = arma::inv_sympd(omega.submat(0, 0, p - 2, p - 2));
 
     /* Calculate gamma_subtractor and omega_22  */
     double gamma_subtractor = calc_gamma_subtractor(

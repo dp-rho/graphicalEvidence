@@ -84,7 +84,8 @@ void looping_mvpdf_process_iteration(
   /* PDF given input x for currently considered mean  */
   z = (x - mean_vecs.col(i).t());
   inplace_tri_mat_mult(z, rooti);
-  out(i) = other_terms - 0.5 * arma::dot(z, z);
+  out[i] = other_terms - 0.5 * arma::dot(z, z);
+
 }
 
 

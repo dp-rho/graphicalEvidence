@@ -118,6 +118,9 @@ void sample_omega_last_col(
         LAPACK_dposv(
           &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
+        if (info_int > 0) {
+          arma::cout << "LAPACK dposv failed" << arma::endl;
+        }
       
       }
       else {

@@ -35,6 +35,7 @@ graphical_evidence_rmatrix <- function(
     for (num_rmat in 1:p) {
       
       cat(paste0("Working on ", num_rmat, "th row of the telescoping sum\n"))
+      reset_times()
       
       # Reduce data by one column
       reduced_data_xx <- xx[, 1:(p - num_rmat + 1)]
@@ -231,7 +232,7 @@ graphical_evidence_rmatrix <- function(
               mean(rand_sample * dawson_num / dawson_denom)
             )
           }
-          
+          # TODO: Add case for p==2
           direct_eval_log_prior_density <- (
             p * (p - 1) / 2 * (log(2) - 1.5 * log(pi)) + 
             sum(log_dawson_vals) - sum(log(abs_lower_tri_vec)) + 
@@ -240,8 +241,14 @@ graphical_evidence_rmatrix <- function(
           )
         }
       }
-      
+      if (any(is.infinite(log_ratio_of_likelihood) | is.nan(log_ratio_of_likelihood))) {
+        browser()
+      }
+      # print(log_ratio_of_likelihood)
+      # print_times(1)
     }
+    # print("direct eval: ")
+    # print(direct_eval_log_prior_density)
     return(sum(log_ratio_of_likelihood) + direct_eval_log_prior_density)
     
   }, error = function(e) {

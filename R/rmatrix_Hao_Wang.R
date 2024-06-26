@@ -148,8 +148,6 @@ rmatrix_Hao_Wang <- function(
       if ((iter > burnin) & (i == p)) {
         inv_c_store[, , (iter - burnin)] <- inv_c
         mean_vec_store[, (iter - burnin)] <- mu_i
-        inv_c_acc <- inv_c_acc + inv_c
-        mean_vec_acc <- mean_vec_acc + mu_i
       }
       
       # Sampling from the Normal density of Equation (15) in the paper
@@ -159,7 +157,7 @@ rmatrix_Hao_Wang <- function(
       beta <- mu_i + solve(chol(inv_c), cur_rnorm)
       
       # Sampling from the gamma density of EQ 15
-      gamma_param <- rgamma_compiled(1, shape, 1 / scale)
+      gamma_param <- rgamma(1, shape, 1 / scale)
       # gamma_vec[rgamma_index] <- gamma_param
       # rgamma_index <- rgamma_index + 1
       
@@ -206,8 +204,8 @@ rmatrix_Hao_Wang <- function(
         }
         else if (prior == 'GHS') {
           rate <- beta^2 / (2 * lambda^2) + 1 / nu_12
-          tau_12 <- 1 / rgamma_compiled(length(rate), 1, rate)
-          nu_12 <- 1 / rgamma_compiled(length(rate), 1, 1 + 1 / tau_12)
+          tau_12 <- 1 / rgamma(length(rate), 1, rate)
+          nu_12 <- 1 / rgamma(length(rate), 1, 1 + 1 / tau_12)
           nu[i, ind_noi] <- nu_12
           nu[ind_noi, i] <- nu_12
         }
@@ -245,6 +243,8 @@ rmatrix_Hao_Wang <- function(
   g_time_env$mcmc_hw_calc_time <- (
     g_time_env$mcmc_hw_calc_time + calc_time
   )
+  cat("HAO WANG CALC TIME: \n")
+  print(calc_time)
   ######################
   
   return(list(

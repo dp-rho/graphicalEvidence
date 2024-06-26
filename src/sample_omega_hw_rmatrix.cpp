@@ -64,6 +64,7 @@ void sample_omega_hw_rmatrix(
     /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
     g_inv_omega_11_hw.TimerStart();
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, cur_sigma, p, i);
+    // inv_omega_11 = arma::inv_sympd(omega.submat(ind_noi, ind_noi));
     g_inv_omega_11_hw.TimerEnd();
 
     /* Wishart case */
@@ -122,10 +123,12 @@ void sample_omega_hw_rmatrix(
     LAPACK_dposv(
       &uplo, &dim, &nrhs, inv_c.memptr(), &dim, solve_for.memptr(), &dim, &info_int
     );
+    // flex_mem = -arma::solve(inv_c, solve_for);
 
     /* Save mu_i before memory is used to calculate beta  */
     if (((iter - burnin) >= 0) && (i == (p - 1))) {
       mean_vec_store.col(iter - burnin) = -solve_for;
+      // mean_vec_store.col(iter - burnin) = flex_mem;
     }
 
     g_mu_reduced1_hw.TimerEnd();
@@ -134,6 +137,7 @@ void sample_omega_hw_rmatrix(
 
     /* Generate random normals needed to solve for beta */
     flex_mem.randn();
+    // solve_for.randn();
 
     /* Solve chol(inv_c) x = randn(), store result in flex_mem  */
     cblas_dtrsm(
@@ -141,6 +145,9 @@ void sample_omega_hw_rmatrix(
       inv_c.memptr(), dim, flex_mem.memptr(), dim
     );
     beta = -solve_for + flex_mem;
+    /* 
+    inv_c = arma::chol(inv_c);
+    beta = flex_mem + arma::solve(inv_c, solve_for); */
 
     g_mu_reduced2_hw.TimerEnd();
 

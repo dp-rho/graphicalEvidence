@@ -37,16 +37,29 @@ evidence <- function(
     # Use a random permutation of columns of xx
     test_perm <- permutation_matrix[i, ]
     
-    # Permute xx and prior specific parameters
-    if (!is.null(G)) {
-      G_perm <- as.matrix(G[test_perm, test_perm])
+    # Permute xx and calculate S for multiple runs
+    if (i == 1) { 
+      
+      xx_perm <- xx
+      if (!is.null(G)) {
+        G_perm <- G 
+      }
+      if (!is.null(V)) {
+        V_perm <- V 
+      }
     }
-    if (!is.null(V)) {
-      V_perm <- as.matrix(V[test_perm, test_perm])
+    else {
+      
+      xx_perm <- as.matrix(xx[, test_perm])
+      if (!is.null(G)) {
+        G_perm <- as.matrix(G[test_perm, test_perm])
+      }
+      if (!is.null(V)) {
+        V_perm <- as.matrix(V[test_perm, test_perm])
+      }
     }
     
-    # Permute xx and calculate S
-    xx_perm <- as.matrix(xx[, test_perm])
+    # Calculate sample covariance matrix
     S <- as.matrix(t(xx_perm) %*% xx_perm)
 
     # Run graphical evidence method on identified prior
@@ -74,6 +87,7 @@ evidence <- function(
       )
     )
     cat("done with run", i, '\n')
+    print(results)
   }
   
   # Filter out infinite and NA values from results

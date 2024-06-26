@@ -55,17 +55,17 @@ rmatrix_last_col_fixed <- function(
     start_point_first_gibbs=ans_last_col[[2]],
     post_mean_omega_22=ans_last_col[[3]]
   ))
-  
+
   ######################
   
   # Random generation debug
-  rnorm_index <- 1
-  rgig_index <- 1
-  rgamma_index <- 1
-  gamma_vec <- numeric((burnin + nmc) * p * (p - 1))
-  rnorm_vec <- numeric((burnin + nmc) * p * (p - 1))
-  rgig_vec <- numeric((burnin + nmc) * p * (p - 1))
-  runi_vec <- c()
+  # rnorm_index <- 1
+  # rgig_index <- 1
+  # rgamma_index <- 1
+  # gamma_vec <- numeric((burnin + nmc) * p * (p - 1))
+  # rnorm_vec <- numeric((burnin + nmc) * p * (p - 1))
+  # rgig_vec <- numeric((burnin + nmc) * p * (p - 1))
+  # runi_vec <- c()
   
   omega_reduced_save <- array(0, dim=c(p, p, nmc))
   gamma_subtractors <- numeric(nmc)
@@ -123,9 +123,9 @@ rmatrix_last_col_fixed <- function(
     inv_omega_11 <- solve(omega_reduced)
 
     # Sample omega_pp
-    gamma_param <- rgamma_compiled(1, shape_const, 1 / scale_const)
-    gamma_vec[rgamma_index] <- gamma_param
-    rgamma_index <- rgamma_index + 1
+    gamma_param <- rgamma(1, shape_const, 1 / scale_const)
+    # gamma_vec[rgamma_index] <- gamma_param
+    # rgamma_index <- rgamma_index + 1
     
     gamma_subtractor <- (
       t(fixed_last_col) %*% inv_omega_11 %*% fixed_last_col
@@ -167,9 +167,9 @@ rmatrix_last_col_fixed <- function(
         }
 
         # Sampling from the gamma density of EQ 15
-        gamma_param_tilde <- rgamma_compiled(1, shape_const, 1 / scale)
-        gamma_vec[rgamma_index] <- gamma_param_tilde
-        rgamma_index <- rgamma_index + 1
+        gamma_param_tilde <- rgamma(1, shape_const, 1 / scale)
+        # gamma_vec[rgamma_index] <- gamma_param_tilde
+        # rgamma_index <- rgamma_index + 1
         # cat(i, "th gamma: ", gamma_param_tilde, '\n')
         
         tilde_w_11 <- omega_reduced_tilde[ind_noi, ind_noi]
@@ -206,8 +206,8 @@ rmatrix_last_col_fixed <- function(
         }
         
         cur_rnorm <- rnorm(p_reduced - 1)
-        rnorm_vec[rnorm_index:(rnorm_index + p_reduced - 2)] <- cur_rnorm
-        rnorm_index <- rnorm_index + p_reduced - 1
+        # rnorm_vec[rnorm_index:(rnorm_index + p_reduced - 2)] <- cur_rnorm
+        # rnorm_index <- rnorm_index + p_reduced - 1
         
         beta <- mu_i + solve(chol(inv_c), cur_rnorm)
         # cat("R code beta: \n", beta, "\n")
@@ -239,20 +239,20 @@ rmatrix_last_col_fixed <- function(
           else if (prior == 'GHS') {
             rate <- beta^2 / (2 * lambda^2) + 1 / nu_12
             
-            gammas1 <- rgamma_compiled(length(rate), 1, vec_rates=rate)
+            gammas1 <- rgamma(length(rate), 1, rate)
             # tau_12 <- 1 / rgamma_compiled(length(rate), 1, vec_rates=rate)
             tau_12 <- 1 / gammas1
             
-            gammas2 <- rgamma_compiled(length(rate), 1, vec_rates=(1 + 1 / tau_12))
+            gammas2 <- rgamma(length(rate), 1, 1 + 1 / tau_12)
             # nu_12 <- 1 / rgamma_compiled(length(rate), 1, vec_rates=(1 + 1 / tau_12))
             nu_12 <- 1 / gammas2
             
-            last_index <- rgamma_index
-            for (j in 1:(p_reduced - 1)) {
-              gamma_vec[rgamma_index + (2 * (j - 1))] <- gammas1[j]
-              gamma_vec[rgamma_index + (2 * (j - 1)) + 1] <- gammas2[j]
-            }
-            rgamma_index <- rgamma_index + (2 * (p_reduced - 1))
+            # last_index <- rgamma_index
+            # for (j in 1:(p_reduced - 1)) {
+            #   gamma_vec[rgamma_index + (2 * (j - 1))] <- gammas1[j]
+            #   gamma_vec[rgamma_index + (2 * (j - 1)) + 1] <- gammas2[j]
+            # }
+            # rgamma_index <- rgamma_index + (2 * (p_reduced - 1))
             # cat(last_index, ":", rgamma_index)
             # print(gamma_vec[last_index:rgamma_index])
           }
@@ -288,7 +288,7 @@ rmatrix_last_col_fixed <- function(
       else if (prior == 'GHS') {
         scale <- 2 / (S_reduced[1, 1] + 1 / lambda)
       }
-      gamma_param <- rgamma_compiled(1, shape_const, 1 / scale)
+      gamma_param <- rgamma(1, shape_const, 1 / scale)
       omega_reduced[1, 1] <- gamma_param + (fixed_last_col[1]^2 / omega_pp)
     }
     
@@ -319,43 +319,16 @@ rmatrix_last_col_fixed <- function(
     }
     
   }
-  # cat("R code shape:", shape_const, "\nscale:", scale_const, "\n")
-  # cat("R code mc11: ", gamma_density_acc / nmc, "\n")
   
-  
-  ##################################
-  # RcppArmadillo implementation  ##
-  ##################################
-  # cat('len rgamma vec: ', length(gamma_vec), '\n')
-  # bind_random_samples_rmatrix(
-  #   gamma_vec, rnorm_vec, rgig_vec, c(1)
-  # )
-
-  # RcppArmadillo implementation
-  ans_last_col <- mcmc_last_col_rmatrix(
-    n, burnin, nmc, dof, lambda, p, coded_prior, fixed_last_col, S,
-    post_mean_tau, matrix_acc_gibbs, post_mean_omega
-  )
-
-  ##################################
-
-  ### R code time profiling ###
+  # ### R code time profiling ###
   calc_time <- proc.time() - start_time_mcmc_last_col
   g_time_env$mcmc_last_col_calc_time <- (
     g_time_env$mcmc_last_col_calc_time + calc_time
   )
-  ######################
+  cat("LAST COL CALC TIME: \n")
+  print(calc_time)
+  # ######################
 
-  return(list(
-    MC_avg_eq_11=ans_last_col[[1]],
-    start_point_first_gibbs=ans_last_col[[2]],
-    post_mean_omega_22=ans_last_col[[3]]
-  ))
-  
-  
-  
-  
-  
   return(list(
     post_mean_omega_22=post_mean_omega_22,
     MC_avg_eq_11=log(gamma_density_acc / nmc)

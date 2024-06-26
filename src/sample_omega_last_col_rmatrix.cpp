@@ -55,11 +55,11 @@ void sample_omega_last_col_rmatrix(
     // double gamma_sample = extract_rgamma();
 
     /* Update inv_omega_11  */
-    // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
     g_last_col_t1.TimerStart();
     efficient_inv_omega_11_calc(
       inv_omega_11, ind_noi, sigma, p_reduced, i
     );
+    // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
     g_last_col_t1.TimerEnd();
 
     /* Dependent on prior, intialize solve_for in g_vec2*/
@@ -79,6 +79,8 @@ void sample_omega_last_col_rmatrix(
       /* Calculate lambda^2 one time  */
       lambda_sq = lambda * lambda;
 
+      /* Set solve for  */
+
       /* Update diagonal of inv_c by adding 1 / tau_12  */
       for (unsigned int j = 0; j < p_reduced - 1; j++) {
 
@@ -93,8 +95,6 @@ void sample_omega_last_col_rmatrix(
           ) / tau.at(ind_noi[j], i)
         );
       }
-
-      /* Set solve for  */
     }
 
     /* GHS case */
@@ -125,10 +125,15 @@ void sample_omega_last_col_rmatrix(
     }
     
     /* -mu_i = solve(inv_c, solve_for), store chol(inv_c) in the pointer of inv_c */
+    g_last_col_t2.TimerStart();
     LAPACK_dposv(
       &uplo, &lapack_dim, &nrhs, inv_c.memptr(), &lapack_dim, solve_for.memptr(), 
       &lapack_dim, &info_int
     );
+    g_last_col_t2.TimerEnd();
+    /* g_last_col_t2.TimerStart();
+    arma::vec mu_i = arma::solve(inv_c, solve_for);
+    g_last_col_t2.TimerEnd(); */
 
     /* Generate random normals needed to solve for beta */
     flex_mem.randn();
@@ -139,9 +144,14 @@ void sample_omega_last_col_rmatrix(
       CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim, 
       nrhs, one, inv_c.memptr(), lapack_dim, flex_mem.memptr(), lapack_dim
     );
+    /* g_last_col_t5.TimerStart();
+    inv_c = arma::chol(inv_c);
+    arma::vec temp = arma::solve(inv_c, flex_mem);
+    g_last_col_t5.TimerEnd(); */
 
     /* Update beta  */
     beta = -solve_for + flex_mem;
+    // beta = temp - mu_i;
 
     /* Update ith col and row of omega and calculate                          */
     /* omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in flex_mem */
@@ -217,7 +227,7 @@ void sample_omega_last_col_rmatrix(
 
     /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
     /* is still stored in global memory g_vec1 from our previous update of omega    */
-    g_last_col_t1.TimerStart();
+
     update_sigma_inplace(
       sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p_reduced, i
     );
