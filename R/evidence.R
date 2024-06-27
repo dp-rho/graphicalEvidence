@@ -37,8 +37,8 @@ evidence <- function(
     # Use a random permutation of columns of xx
     test_perm <- permutation_matrix[i, ]
     
-    # Permute xx and calculate S for multiple runs
-    if (i == 1) { 
+    # Permute xx columns and then calculate S for multiple runs
+    if (i == 1) {
       
       xx_perm <- xx
       if (!is.null(G)) {
@@ -71,12 +71,12 @@ evidence <- function(
         xx_perm, S, n, p, burnin, nmc, prior_name, alpha=alpha, V=V_perm,
       ),
       
-      # Initial R implementation
+      # Largely implemented in C++
       'BGL' = graphical_evidence_rmatrix(
         xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda
       ),
       
-      # Initial R implementation
+      # Largely implemented in C++
       'GHS' = graphical_evidence_rmatrix(
         xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda
       ),
@@ -97,6 +97,6 @@ evidence <- function(
   cat(init_len - trunc_len, "runs excluded for NaN\n")
   
   return(
-    list(mean=mean(results), var=var(results), results=results)
+    list(mean=mean(results), sd=sqrt(var(results)), results=results)
   )
 }
