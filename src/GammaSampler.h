@@ -1,3 +1,5 @@
+#pragma once
+
 /* Class for generating a gamma sample with input shape and scale */
 
 

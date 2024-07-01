@@ -28,7 +28,7 @@ List mcmc_hw(
   arma::mat gibbs_mat(gibbs_mat_nvec.begin(), p, p);
   arma::mat g_mat_adj(g_mat_adj_nvec.begin(), p, p);
 
-  arma::mat sigma = arma::inv(omega);
+  arma::mat sigma = arma::inv_sympd(omega);
 
   /* Time profiling */
   g_mcmc_hw_timer.TimerStart();
@@ -55,7 +55,7 @@ List mcmc_hw(
   /* Iterate burnin + nmc times and save results past burnin  */
   arma::uword total_iters = static_cast<arma::uword>(burnin + nmc);
 
-  //g_sample_omega_hw.TimerStart();
+  g_sample_omega_hw.TimerStart();
 
   for (arma::uword i = 0; i < total_iters; i++) {
     sample_omega_hw(
@@ -65,7 +65,7 @@ List mcmc_hw(
     );
   }
 
-  //g_sample_omega_hw.TimerEnd();
+  g_sample_omega_hw.TimerEnd();
 
   /* Get posterior mean of sampled omega  */
   omega_save /= nmc;

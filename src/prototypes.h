@@ -58,11 +58,6 @@ void sample_omega_hw_rmatrix(
   arma::umat const&, arma::mat const&, const double, const double*
 );
 
-void efficient_inv_omega_11_calc(
-  arma::mat&, arma::uvec const&, arma::mat const&,
-  const unsigned int, const unsigned int
-);
-
 void update_sigma_inplace(
   arma::mat&, arma::mat const&, double*, arma::uvec const&,
   const double, const unsigned int, const unsigned int
@@ -109,6 +104,16 @@ void last_col_prepare_sigma_reduced(
 
 void update_sigma_last_col(
   arma::mat&, arma::vec const&, const double
+);
+
+/* Functions in efficient_inv_omega_11_calc.cpp */
+void efficient_inv_omega_11_calc(
+  arma::mat&, arma::uvec const&, arma::mat const&,
+  const unsigned int, const unsigned int
+);
+void efficient_inv_omega_11_calc_no_simd(
+  arma::mat&, arma::uvec const&, arma::mat const&,
+  const unsigned int, const unsigned int
 );
 
 /* Functions in calc_eq_11.cpp  */

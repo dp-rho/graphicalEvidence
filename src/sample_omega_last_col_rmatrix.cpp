@@ -56,9 +56,7 @@ void sample_omega_last_col_rmatrix(
 
     /* Update inv_omega_11  */
     g_last_col_t1.TimerStart();
-    efficient_inv_omega_11_calc(
-      inv_omega_11, ind_noi, sigma, p_reduced, i
-    );
+    efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p_reduced, i);
     // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
     g_last_col_t1.TimerEnd();
 
@@ -202,7 +200,7 @@ void sample_omega_last_col_rmatrix(
     /* GHS case */
     else if (prior == GHS) {
       
-      g_update_omega_hw.TimerStart();
+      g_last_col_t6.TimerStart();
 
       /* Sample tau_12 and nu_12 */
       for (unsigned int j = 0; j < (p_reduced - 1); j++) {
@@ -222,7 +220,7 @@ void sample_omega_last_col_rmatrix(
         nu.at(i, ind_noi[j]) = cur_nu;
       }
 
-      g_update_omega_hw.TimerEnd();
+      g_last_col_t6.TimerEnd();
     }
 
     /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */

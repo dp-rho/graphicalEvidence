@@ -85,9 +85,7 @@ void sample_omega_hw(
     /* Calculate mean mu and assign to one indices if they exist */
     if (reduced_dim) {
 
-      /* Time profiling */
-      g_mu_reduced1_hw.TimerStart();
-
+      g_inv_c_hw.TimerStart();
       /* Case where some ones are found in current col  */
       inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
 
@@ -96,6 +94,11 @@ void sample_omega_hw(
         int row_index = ind_noi_mat.at(find_which_ones[i][j], i);
         g_vec2[j] = s_mat.at(row_index, i) + scale_mat.at(row_index, i);
       }
+
+      g_inv_c_hw.TimerEnd();
+
+      /* Time profiling */
+      g_mu_reduced1_hw.TimerStart();
 
       solve_mu_reduced_hw_in_place(
         i, find_which_ones[i], find_which_zeros[i], inv_c
@@ -121,13 +124,13 @@ void sample_omega_hw(
       /* Time profiling */
       g_mu_reduced2_hw.TimerEnd();
 
-      /* Time profiling */
-      g_mu_reduced3_hw.TimerStart();
-
       /* Generate random normals in g_vec1  */
       for (unsigned int j = 0; j < reduced_dim; j++) {
         g_vec1[j] = arma::randn();
       }
+
+      /* Time profiling */
+      g_mu_reduced3_hw.TimerStart();
 
       /* Solve chol(inv_c) x = randn(), store result in g_vec1  */
       cblas_dtrsm(
@@ -145,7 +148,7 @@ void sample_omega_hw(
     }
 
     /* Time profiling */
-    g_update_omega_hw.TimerStart();
+    g_update_omega_hw1.TimerStart();
 
     /* Update ith col and row of omega and */
     /* calculate omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in g_vec1 */
@@ -168,13 +171,19 @@ void sample_omega_hw(
       omega_22 += (beta[j] * g_vec1[j]);
     }
     omega.at(i, i) = omega_22;
+    
+    /* Time profiling */
+    g_update_omega_hw1.TimerEnd();
+
+    /* Time profiling */
+    g_update_omega_hw2.TimerStart();
 
     update_sigma_inplace(
       sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p, i
     );
 
     /* Time profiling */
-    g_update_omega_hw.TimerEnd();
+    g_update_omega_hw2.TimerEnd();
   }
 
   /* If iteration is past burnin period, accumulate Omega */

@@ -1,3 +1,5 @@
+#pragma once
+
 /* global_storage.h */
 
 /* Global constants for prior coding and size */

@@ -9,6 +9,7 @@ Description: Placeholder.
 License: GPL (>= 2)
 Imports:
 	Rcpp (>= 1.0.12),
-	parallel
+	parallel,
+	RcppXsimd
 LinkingTo: Rcpp, RcppArmadillo
 StagedInstall: no

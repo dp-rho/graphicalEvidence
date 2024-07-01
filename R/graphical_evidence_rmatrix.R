@@ -241,14 +241,9 @@ graphical_evidence_rmatrix <- function(
           )
         }
       }
-      if (any(is.infinite(log_ratio_of_likelihood) | is.nan(log_ratio_of_likelihood))) {
-        browser()
-      }
-      # print(log_ratio_of_likelihood)
-      # print_times(1)
+      
     }
-    # print("direct eval: ")
-    # print(direct_eval_log_prior_density)
+    
     return(sum(log_ratio_of_likelihood) + direct_eval_log_prior_density)
     
   }, error = function(e) {

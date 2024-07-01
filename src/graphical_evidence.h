@@ -3,10 +3,10 @@
 #pragma once
 
 /* Parallel execution enabled through OpenMP  */
-// [[Rcpp::plugins(openmp)]]
+// [[Rcpp:NOT:plugins(openmp)]]
 #include <omp.h>
 
-/* RcppArmadillo used as wrapper for LAPACK/BLAS routines */
+/* RcppArmadillo used for some linear algebra structures  */
 // [[Rcpp::depends("RcppArmadillo")]]
 #include <RcppArmadillo.h>
 
@@ -17,7 +17,7 @@
 #include <cmath>
 #include <lapacke.h>
 #include <cblas.h>
-#include <immintrin.h>
+#include "simd_intrinsics.h"
 #include "global_storage.h"
 #include "FunctionTimer.h"
 #include "GammaSampler.h"

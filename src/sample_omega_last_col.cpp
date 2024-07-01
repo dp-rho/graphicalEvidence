@@ -32,11 +32,6 @@ void sample_omega_last_col(
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
 
-  /* TEMP */
-  arma::vec sol1;
-  arma::mat mat1;
-  arma::vec sol2;
-
   /* Iterate through 1 to p_reduced for restricted sampler  */
   for (arma::uword i = 0; i < p_reduced; i++) {
 
@@ -49,9 +44,7 @@ void sample_omega_last_col(
     /* Update inv_omega_11  */
     // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
     g_last_col_t1.TimerStart();
-    efficient_inv_omega_11_calc(
-     inv_omega_11, ind_noi, sigma, p_reduced, i
-    );
+    efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p_reduced, i);
     g_last_col_t1.TimerEnd();
 
     /* Initialize beta indices where zeros occur  */
@@ -66,9 +59,6 @@ void sample_omega_last_col(
         (last_col_outer.at(ind_noi[which_zero], i) / omega_pp)
       );
     }
-
-    /* Time profiling */
-    g_last_col_t3.TimerStart();
 
     /* Number of ones in the adjacency matrix column  */
     const arma::uword reduced_dim = find_which_ones[i].n_elem;
@@ -87,6 +77,9 @@ void sample_omega_last_col(
       }
 
       if (find_which_zeros[i].n_elem) {
+
+        /* Time profiling */
+        g_last_col_t3.TimerStart();
 
         /* Update g_vec2 to store V[ind_noi, i] + S[ind_noi, i] +                 */
         /* + Gibbs[reduced_zeros, i].t() * inv_c[reduced_zeros, reduced_ones] +   */
@@ -114,23 +107,34 @@ void sample_omega_last_col(
           dot2 /= omega_pp;
           g_vec2[j] += (dot1 + dot2);
         }
+        g_last_col_t3.TimerEnd();
 
+        g_last_col_t5.TimerStart();
         LAPACK_dposv(
           &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
+        g_last_col_t5.TimerEnd();
+
         if (info_int > 0) {
           arma::cout << "LAPACK dposv failed" << arma::endl;
         }
       
       }
       else {
+
+        /* Time profiling */
+        g_last_col_t3.TimerStart();
+
         for (unsigned int j = 0; j < reduced_dim; j++) {
           g_vec2[j] = arma::randn();
         }
+        g_last_col_t3.TimerEnd();
 
+        g_last_col_t5.TimerStart();
         LAPACK_dposv(
           &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
+        g_last_col_t5.TimerEnd();
       }
 
       /* Assign random normals to g_vec1 to solve for beta ones */
@@ -138,23 +142,24 @@ void sample_omega_last_col(
         g_vec1[j] = arma::randn();
       }
 
+      g_last_col_t6.TimerStart();
       /* Solve chol(inv_c) x = randn(), store result in g_vec1  */
       cblas_dtrsm(
         CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim, nrhs, one,
         g_mat1, lapack_dim, g_vec1, lapack_dim
       );
+      g_last_col_t6.TimerEnd();
 
       /* Update beta[which_ones] = difference of g_vec1 and g_vec2  */
       for (unsigned int j = 0; j < reduced_dim; j++) {
         beta[find_which_ones[i][j]] = g_vec1[j] - g_vec2[j];
       }
-    } 
-    g_last_col_t3.TimerEnd();
+    }
 
     g_last_col_t2.TimerStart();
 
-    /* Update ith col and row of omega and */
-    /* calculate omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in g_vec1 */
+    /* Update ith col and row of omega and calculate                        */
+    /* omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in g_vec1 */
     double omega_22 = gamma_sample;
     for (unsigned int j = 0; j < (p_reduced - 1); j++) {
 

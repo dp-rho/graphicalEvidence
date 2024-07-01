@@ -153,6 +153,7 @@ void sample_omega_hw_rmatrix(
 
     g_sample_omega_hw.TimerStart();
 
+    g_update_omega_hw1.TimerStart();
     /* Update flex_mem to store inv_omega_11 %*% beta */
     flex_mem = inv_omega_11 * beta;
 
@@ -162,6 +163,7 @@ void sample_omega_hw_rmatrix(
       omega.at(i, ind_noi[j]) = beta[j];
     }
     omega.at(i, i) = gamma_param + arma::dot(beta, flex_mem);
+    g_update_omega_hw1.TimerEnd();
 
     g_sample_omega_hw.TimerEnd();
 
@@ -181,7 +183,7 @@ void sample_omega_hw_rmatrix(
 
     /* BGL case */
     else if (prior == BGL) {
-      g_update_omega_hw.TimerStart();
+      g_update_omega_hw2.TimerStart();
 
       /* Calculate a_gig_tau and resuse variable to sample tau_12 */
       for (unsigned int j = 0; j < (p - 1); j++) {
@@ -192,13 +194,13 @@ void sample_omega_hw_rmatrix(
         tau.at(i, ind_noi[j]) = gig_tau;
       }
 
-      g_update_omega_hw.TimerEnd();
+      g_update_omega_hw2.TimerEnd();
     }
 
     /* GHS case */
     else if (prior == GHS) {
 
-      g_update_omega_hw.TimerStart();
+      g_update_omega_hw2.TimerStart();
       /* Sample tau_12 and nu_12 */
       for (unsigned int j = 0; j < (p - 1); j++) {
 
@@ -215,7 +217,7 @@ void sample_omega_hw_rmatrix(
         nu.at(i, ind_noi[j]) = cur_nu;
       }
 
-      g_update_omega_hw.TimerEnd();
+      g_update_omega_hw2.TimerEnd();
     }
 
   }
@@ -227,36 +229,6 @@ void sample_omega_hw_rmatrix(
   }
 
 }
-
-
-/* 
- * Computationally efficient calculation of inverse of omega_11:
- * For this implementation, inverse of omega_11 can be calculated as
- * sigma_11 - sigma_12 %*% t(sigma_12) / sigma_22
- */
-
-void efficient_inv_omega_11_calc(
-  arma::mat& inv_omega_11,
-  arma::uvec const& ind_noi,
-  arma::mat const& sigma,
-  const unsigned int p,
-  const unsigned int ith
-) {                
-
-  /* Iterate over cols  */
-  for (unsigned int i = 0; i < (p - 1); i++) {
-
-    /* Iterate over rows  */
-    for (unsigned int j = 0; j < (p - 1); j++) {
-
-      inv_omega_11.at(j, i) = sigma.at(ind_noi[j], ind_noi[i]) - (
-        sigma.at(ind_noi[j], ith) * sigma.at(ind_noi[i], ith) /
-        sigma.at(ith, ith)
-      );
-    }
-  } 
-}
-
 
 /*
  * Update sigma for either BGL or GHS prior in place using:

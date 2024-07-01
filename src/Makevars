@@ -1,2 +1,19 @@
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
-PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+# Check SIMD support
+# Note: If SSE is available on CPU, compile flags will be included
+# automatically by the R Makeconf
+
+# Check AVX512 support
+SUPPORTS_AVX512 := $(shell Rscript -e "cat(RcppXsimd::supportsAVX512())")
+
+# Check AVX support
+SUPPORTS_AVX := $(shell Rscript -e "cat(RcppXsimd::supportsAVX())")
+
+ifeq ($(SUPPORTS_AVX512),TRUE)
+    PKG_CXXFLAGS += -mavx512dq
+else ifeq ($(SUPPORTS_AVX),TRUE)
+    PKG_CXXFLAGS += -mavx
+endif
+
+PKG_LIBS = -lopenblas $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
