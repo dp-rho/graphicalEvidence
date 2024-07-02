@@ -28,6 +28,45 @@ void efficient_inv_omega_11_calc_no_simd(
   }
 }
 
+#if defined(__AVX512F__) || defined(__AVX__) || defined(__SSE2__)
+
+/*
+ * Explicit SIMD code to calculate rows of inv_omega_11 in
+ * computationally efficient formula:
+ * sigma_11 - sigma_12 %*% t(sigma_12) / sigma_22
+ */
+
+void calculate_inv_omega_11_rows(
+  const unsigned int start,
+  const unsigned int stop,
+  arma::mat& inv_omega_11,
+  arma::mat const& sigma,
+  const unsigned int p,
+  const unsigned int ith
+) {
+
+}
+
+
+/* 
+ * Explicit SIMD code to calculate columns of inv_omega_11 in 
+ * computationally efficient formula:
+ * sigma_11 - sigma_12 %*% t(sigma_12) / sigma_22
+ */
+
+void calculate_inv_omega_11_cols(
+  const unsigned int start,
+  const unsigned int stop,
+  arma::mat& inv_omega_11,
+  arma::mat const& sigma,
+  const unsigned int p,
+  const unsigned int ith
+) {
+
+}
+
+
+#endif
 
 /*
  * Computationally efficient calculation of inverse of omega_11:
@@ -54,7 +93,6 @@ void efficient_inv_omega_11_calc(
   unsigned int u1 = (ith / SIMD_WIDTH) * SIMD_WIDTH;
   unsigned int r1 = (ith % SIMD_WIDTH) + u1;
   unsigned int u2 = ((p - ith - 1) / SIMD_WIDTH) * SIMD_WIDTH + ith + 1;
-  unsigned int r2 = ((p - ith - 1) % SIMD_WIDTH) + u2;
 
   /* The ith column pointer of sigma */
   const double* sigma_col_i = sigma.colptr(ith);
@@ -126,8 +164,8 @@ void efficient_inv_omega_11_calc(
       _simd_storeu_pd(&inv11_cur_col[cur_row - 1], res);
     }
 
-    /* Finish remaining rows using standard looping from u2 to r2 */
-    for (unsigned int cur_row = u2; cur_row < r2; cur_row++) {
+    /* Finish remaining rows using standard looping from u2 to p */
+    for (unsigned int cur_row = u2; cur_row < p; cur_row++) {
       inv_omega_11.at(cur_row - 1, cur_col) = sigma.at(cur_row, cur_col) - (
         sigma.at(cur_row, ith) * sigma.at(cur_col, ith) /
         sigma.at(ith, ith)
@@ -174,11 +212,6 @@ void efficient_inv_omega_11_calc(
         sigma.at(ith, ith)
       );
     }
-    /*
-    if (debug) {
-      arma::cout << "finished normal row iteration b3\n";
-      arma::cout << "cur inv_omega_11: \n" << inv_omega_11 << arma::endl;
-    } */
 
     /* Iterate over rows from [ith + 1, p): */
     /* First SIMD iteration up to u2        */
@@ -202,8 +235,8 @@ void efficient_inv_omega_11_calc(
       _simd_storeu_pd(&inv11_cur_col[cur_row - 1], res);
     }
 
-    /* Finish remaining rows using standard looping from u2 to r2 */
-    for (unsigned int cur_row = u2; cur_row < r2; cur_row++) {
+    /* Finish remaining rows using standard looping from u2 to p */
+    for (unsigned int cur_row = u2; cur_row < p; cur_row++) {
       inv_omega_11.at(cur_row - 1, cur_col - 1) = sigma.at(cur_row, cur_col) - (
         sigma.at(cur_row, ith) * sigma.at(cur_col, ith) /
         sigma.at(ith, ith)

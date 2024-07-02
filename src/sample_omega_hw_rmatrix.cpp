@@ -151,8 +151,6 @@ void sample_omega_hw_rmatrix(
 
     g_mu_reduced2_hw.TimerEnd();
 
-    g_sample_omega_hw.TimerStart();
-
     g_update_omega_hw1.TimerStart();
     /* Update flex_mem to store inv_omega_11 %*% beta */
     flex_mem = inv_omega_11 * beta;
@@ -164,8 +162,6 @@ void sample_omega_hw_rmatrix(
     }
     omega.at(i, i) = gamma_param + arma::dot(beta, flex_mem);
     g_update_omega_hw1.TimerEnd();
-
-    g_sample_omega_hw.TimerEnd();
 
     /* Update sigma */
     g_mu_reduced3_hw.TimerStart();

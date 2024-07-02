@@ -241,7 +241,6 @@ graphical_evidence_rmatrix <- function(
           )
         }
       }
-      
     }
     
     return(sum(log_ratio_of_likelihood) + direct_eval_log_prior_density)

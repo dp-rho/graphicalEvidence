@@ -43,5 +43,5 @@
 
 /* No SIMD detected */
 #else
-  #define SIMD_WIDTH 2
+  #define SIMD_WIDTH 1
 #endif
