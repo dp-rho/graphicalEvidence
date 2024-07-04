@@ -26,8 +26,10 @@ void sample_omega_last_col(
   arma::mat const& last_col_outer
 ) {
 
+  g_last_col_t9.TimerStart();
   /* Tilda parameterization sampling  */
   omega_reduced -= ((1 / omega_pp) * last_col_outer);
+  g_last_col_t9.TimerEnd();
 
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
@@ -42,11 +44,11 @@ void sample_omega_last_col(
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[i]);
 
     /* Update inv_omega_11  */
-    // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
     g_last_col_t1.TimerStart();
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p_reduced, i);
     g_last_col_t1.TimerEnd();
 
+    g_last_col_t7.TimerStart();
     /* Initialize beta indices where zeros occur  */
     for (unsigned int j = 0; j < find_which_zeros[i].n_elem; j++) {
 
@@ -59,14 +61,17 @@ void sample_omega_last_col(
         (last_col_outer.at(ind_noi[which_zero], i) / omega_pp)
       );
     }
+    g_last_col_t7.TimerEnd();
 
     /* Number of ones in the adjacency matrix column  */
     const arma::uword reduced_dim = find_which_ones[i].n_elem;
     int lapack_dim = (int)reduced_dim;
     if (reduced_dim) {
 
+      g_last_col_t8.TimerStart();
       /* Calculate inv_c  */
-      inv_c = inv_omega_11 * s_mat.at(i, i) * scale_mat.at(i, i);
+      inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
+      g_last_col_t8.TimerEnd();
 
       /* Fill global memory with inv_c[which_ones, which_ones]  */
       int assign_index = 0;
@@ -157,28 +162,9 @@ void sample_omega_last_col(
     }
 
     g_last_col_t2.TimerStart();
-
-    /* Update ith col and row of omega and calculate                        */
-    /* omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in g_vec1 */
-    double omega_22 = gamma_sample;
-    for (unsigned int j = 0; j < (p_reduced - 1); j++) {
-
-      /* Update the col and row indices excluding the diagonal  */
-      omega_reduced.at(ind_noi[j], i) = beta[j];
-      omega_reduced.at(i, ind_noi[j]) = beta[j];
-
-      /* Store beta.t() * inv_omega_11 in g_vec1  */
-      g_vec1[j] = 0;
-      for (unsigned int k = 0; k < (p_reduced - 1); k++) {
-
-        /* First beta.t() * inv_omega_11[, k] */
-        g_vec1[j] += (beta[k] * inv_omega_11.at(k, j));
-      }
-
-      /* Accumulate beta_omega[j] * beta[j] */
-      omega_22 += (beta[j] * g_vec1[j]);
-    }
-    omega_reduced.at(i, i) = omega_22; 
+    update_omega_inplace(
+      omega_reduced, inv_omega_11, beta, ind_noi, gamma_sample, i, p_reduced
+    );
     g_last_col_t2.TimerEnd();
 
     /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
@@ -191,7 +177,8 @@ void sample_omega_last_col(
 
   }
 
-  /* Update omega reduced with last col outer product */ 
+  /* Update omega reduced with last col outer product */
+  g_last_col_t9.TimerStart();
   omega_reduced += ((1 / omega_pp) * last_col_outer);
-
+  g_last_col_t9.TimerEnd();
 }

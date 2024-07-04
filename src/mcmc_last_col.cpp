@@ -246,12 +246,6 @@ void last_col_prepare_sigma_reduced(
     g_vec1[i] = sum;
   }
 
-   
-  // arma::cout << "fast sigma update temp: " << arma::rowvec(g_vec1, p_reduced, false);
-  /* arma::cout << "direct sigma update temp: " << fixed_last_col.t() * inv_omega_11_full << arma::endl;
-  arma::rowvec temp = fixed_last_col.t() * inv_omega_11_full;
-  arma::mat ddirect = inv_omega_11_full + (temp.t() * temp) / gamma_param;
-  arma::cout << "fast and direct sigma pre loop: \n" << ddirect << arma::endl; */
   /* Update sigma from indices 0 to p_reduced */
 
   /* Iterate over cols  */

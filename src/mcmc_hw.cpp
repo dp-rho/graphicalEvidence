@@ -55,13 +55,21 @@ List mcmc_hw(
   /* Iterate burnin + nmc times and save results past burnin  */
   arma::uword total_iters = static_cast<arma::uword>(burnin + nmc);
 
+  /* Generate gamma sampling parameters */
+  double scale_params[p];
+  const double shape_param = alpha + ((double)n / 2) + 1;
+  for (unsigned int i = 0; i < (unsigned int) p; i++) {
+    scale_params[i] = 2 / (s_mat.at(i, i) + scale_mat.at(i, i));
+  }
+
   g_sample_omega_hw.TimerStart();
 
   for (arma::uword i = 0; i < total_iters; i++) {
     sample_omega_hw(
       i, burnin, n, alpha, beta, omega, inv_omega_11, inv_c, omega_save,
       mean_vec_store, inv_c_required_store, gibbs_mat, g_mat_adj, ind_noi_mat,
-      find_which_ones, find_which_zeros, scale_mat, s_mat, sigma
+      find_which_ones, find_which_zeros, scale_mat, s_mat, sigma, shape_param,
+      scale_params
     );
   }
 

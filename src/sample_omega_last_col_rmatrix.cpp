@@ -128,24 +128,23 @@ void sample_omega_last_col_rmatrix(
       &uplo, &lapack_dim, &nrhs, inv_c.memptr(), &lapack_dim, solve_for.memptr(), 
       &lapack_dim, &info_int
     );
+    //arma::vec mu_i = arma::solve(inv_c, solve_for);
     g_last_col_t2.TimerEnd();
-    /* g_last_col_t2.TimerStart();
-    arma::vec mu_i = arma::solve(inv_c, solve_for);
-    g_last_col_t2.TimerEnd(); */
 
     /* Generate random normals needed to solve for beta */
     flex_mem.randn();
     // extract_rnorm(flex_mem.memptr(), lapack_dim);
 
+    g_last_col_t5.TimerStart();
+
     /* Solve chol(inv_c) x = randn(), store result in flex_mem  */
     cblas_dtrsm(
-      CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim, 
+      CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim,
       nrhs, one, inv_c.memptr(), lapack_dim, flex_mem.memptr(), lapack_dim
     );
-    /* g_last_col_t5.TimerStart();
-    inv_c = arma::chol(inv_c);
-    arma::vec temp = arma::solve(inv_c, flex_mem);
-    g_last_col_t5.TimerEnd(); */
+    /* inv_c = arma::chol(inv_c);
+    arma::vec temp = arma::solve(inv_c, flex_mem); */
+    g_last_col_t5.TimerEnd();
 
     /* Update beta  */
     beta = -solve_for + flex_mem;
@@ -153,25 +152,9 @@ void sample_omega_last_col_rmatrix(
 
     /* Update ith col and row of omega and calculate                          */
     /* omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in flex_mem */
-    double omega_22 = gamma_sample;
-    for (unsigned int j = 0; j < (p_reduced - 1); j++) {
-
-      /* Update the col and row indices excluding the diagonal  */
-      omega_reduced.at(ind_noi[j], i) = beta[j];
-      omega_reduced.at(i, ind_noi[j]) = beta[j];
-
-      /* Store beta.t() * inv_omega_11 in g_vec1  */
-      flex_mem[j] = 0;
-      for (unsigned int k = 0; k < (p_reduced - 1); k++) {
-
-        /* First beta.t() * inv_omega_11[, k] */
-        flex_mem[j] += (beta[k] * inv_omega_11.at(k, j));
-      }
-
-      /* Accumulate beta_omega[j] * beta[j] */
-      omega_22 += (beta[j] * flex_mem[j]);
-    }
-    omega_reduced.at(i, i) = omega_22;
+    update_omega_inplace(
+      omega_reduced, inv_omega_11, beta, ind_noi, gamma_sample, i, p_reduced
+    );
 
     /* Conditional on prior, update sampling memory */
     

@@ -47,7 +47,8 @@ void sample_omega_hw(
   arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
   arma::cube&, arma::mat const&, arma::mat const&, arma::umat const&,
   std::vector<arma::uvec> const&, std::vector<arma::uvec> const&,
-  arma::mat const&, arma::mat const&, arma::mat&
+  arma::mat const&, arma::mat const&, arma::mat&, const double,
+  const double*
 );
 
 /* Functions in sample_omega_hw_rmatrix */
@@ -56,11 +57,6 @@ void sample_omega_hw_rmatrix(
   arma::vec&, arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
   arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::cube&, arma::mat const&,
   arma::umat const&, arma::mat const&, const double, const double*
-);
-
-void update_sigma_inplace(
-  arma::mat&, arma::mat const&, double*, arma::uvec const&,
-  const double, const unsigned int, const unsigned int
 );
 
 /* Functions in initialize_indices.cpp  */
@@ -90,6 +86,7 @@ void sample_omega_last_col_rmatrix(
 );
 
 /* Functions in mcmc_last_col_rmatrix */
+/* mcmc_last_col_rmatrix() not called internally  */
 void last_col_calc_inv_omega_11_full(
   arma::mat&, arma::mat const&
 );
@@ -111,9 +108,32 @@ void efficient_inv_omega_11_calc(
   arma::mat&, arma::uvec const&, arma::mat const&,
   const unsigned int, const unsigned int
 );
+
 void efficient_inv_omega_11_calc_no_simd(
   arma::mat&, arma::uvec const&, arma::mat const&,
   const unsigned int, const unsigned int
+);
+
+/* Functions in update_sigma_inplace.cpp  */
+void update_sigma_inplace(
+  arma::mat&, arma::mat const&, double*, arma::uvec const&,
+  const double, const unsigned int, const unsigned int
+);
+
+void update_sigma_inplace_no_simd(
+  arma::mat&, arma::mat const&, double*, arma::uvec const&,
+  const double, const unsigned int, const unsigned int
+);
+
+/* Functions in update_omega_inplace.cpp  */
+void update_omega_inplace(
+  arma::mat&, arma::mat const&, arma::vec const&, arma::uvec const&,
+  const double, const unsigned int, const unsigned int
+);
+
+void update_omega_inplace_no_simd(
+  arma::mat&, arma::mat const&, arma::vec const&, arma::uvec const&,
+  const double, const unsigned int, const unsigned int
 );
 
 /* Functions in calc_eq_11.cpp  */

@@ -19,6 +19,9 @@ FunctionTimer g_last_col_t3("g_last_col_t3");
 FunctionTimer g_last_col_t4("g_last_col_t4");
 FunctionTimer g_last_col_t5("g_last_col_t5");
 FunctionTimer g_last_col_t6("g_last_col_t6");
+FunctionTimer g_last_col_t7("g_last_col_t7");
+FunctionTimer g_last_col_t8("g_last_col_t8");
+FunctionTimer g_last_col_t9("g_last_col_t9");
 
 
 /*
@@ -44,6 +47,9 @@ void print_times(const int nruns) {
   g_last_col_t4.getTotalDuration(nruns);
   g_last_col_t5.getTotalDuration(nruns);
   g_last_col_t6.getTotalDuration(nruns);
+  g_last_col_t7.getTotalDuration(nruns);
+  g_last_col_t8.getTotalDuration(nruns);
+  g_last_col_t9.getTotalDuration(nruns);
 }
 
 
@@ -70,4 +76,7 @@ void reset_times() {
   g_last_col_t4.resetDuration();
   g_last_col_t5.resetDuration();
   g_last_col_t6.resetDuration();
+  g_last_col_t7.resetDuration();
+  g_last_col_t8.resetDuration();
+  g_last_col_t9.resetDuration();
 }

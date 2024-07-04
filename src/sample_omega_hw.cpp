@@ -26,7 +26,9 @@ void sample_omega_hw(
   std::vector<arma::uvec> const& find_which_zeros,
   arma::mat const& scale_mat,
   arma::mat const& s_mat,
-  arma::mat& sigma
+  arma::mat& sigma,
+  const double shape_param,
+  const double* scale_params
 ) {
 
   /* Number of cols to be iterated through  */
@@ -34,14 +36,6 @@ void sample_omega_hw(
 
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
-
-  /* Gamma generation constants */
-  /* TODO: Move to top scope */
-  double scale_params[p];
-  const double shape_param = alpha + ((double)n / 2) + 1;
-  for (unsigned int i = 0; i < p; i++) {
-    scale_params[i] = 2 / (s_mat.at(i, i) + scale_mat.at(i, i));
-  }
 
   for (arma::uword i = 0; i < p; i++) {
 
@@ -88,14 +82,13 @@ void sample_omega_hw(
       g_inv_c_hw.TimerStart();
       /* Case where some ones are found in current col  */
       inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
+      g_inv_c_hw.TimerEnd();
 
       /* Manual memory management, initialize solve for vector to find mu reduced */
       for (unsigned int j = 0; j < reduced_dim; j++) {
         int row_index = ind_noi_mat.at(find_which_ones[i][j], i);
         g_vec2[j] = s_mat.at(row_index, i) + scale_mat.at(row_index, i);
       }
-
-      g_inv_c_hw.TimerEnd();
 
       /* Time profiling */
       g_mu_reduced1_hw.TimerStart();
@@ -149,29 +142,7 @@ void sample_omega_hw(
 
     /* Time profiling */
     g_update_omega_hw1.TimerStart();
-
-    /* Update ith col and row of omega and */
-    /* calculate omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in g_vec1 */
-    double omega_22 = gamma_sample;
-    for (unsigned int j = 0; j < (p - 1); j++) {
-
-      /* Update the col and row indices excluding the diagonal  */
-      omega.at(ind_noi[j], i) = beta[j];
-      omega.at(i, ind_noi[j]) = beta[j];
-
-      /* Store beta.t() * inv_omega_11 in g_vec1  */
-      g_vec1[j] = 0;
-      for (unsigned int k = 0; k < (p - 1); k++) {
-
-        /* First beta.t() * inv_omega_11[, k] */
-        g_vec1[j] += (beta[k] * inv_omega_11.at(k, j));
-      }
-
-      /* Accumulate beta_omega[j] * beta[j] */
-      omega_22 += (beta[j] * g_vec1[j]);
-    }
-    omega.at(i, i) = omega_22;
-    
+    update_omega_inplace(omega, inv_omega_11, beta, ind_noi, gamma_sample, i, p);
     /* Time profiling */
     g_update_omega_hw1.TimerEnd();
 

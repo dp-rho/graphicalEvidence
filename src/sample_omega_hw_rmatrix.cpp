@@ -153,14 +153,7 @@ void sample_omega_hw_rmatrix(
 
     g_update_omega_hw1.TimerStart();
     /* Update flex_mem to store inv_omega_11 %*% beta */
-    flex_mem = inv_omega_11 * beta;
-
-    /* Update ith row and col of omega  */
-    for (unsigned int j = 0; j < (p - 1); j++) {
-      omega.at(ind_noi[j], i) = beta[j];
-      omega.at(i, ind_noi[j]) = beta[j];
-    }
-    omega.at(i, i) = gamma_param + arma::dot(beta, flex_mem);
+    update_omega_inplace(omega, inv_omega_11, beta, ind_noi, gamma_param, i, p);
     g_update_omega_hw1.TimerEnd();
 
     /* Update sigma */
@@ -224,42 +217,4 @@ void sample_omega_hw_rmatrix(
     tau_save += tau;
   }
 
-}
-
-/*
- * Update sigma for either BGL or GHS prior in place using:
- * sigma_11 = inv_omega_11 + (omega_beta %*% t(omega_beta) / gamma_param)
- * sigma_12 = -omega_beta / gamma_param
- * sigma_22 = 1 / gamma_param
- */
-
-void update_sigma_inplace(
-  arma::mat& sigma,
-  arma::mat const& inv_omega_11,
-  double* omega_beta,
-  arma::uvec const& ind_noi,
-  const double gamma_param,
-  const unsigned int p,
-  const unsigned int ith
-) {
-
-  /* Iterate over cols  */
-  for (unsigned int i = 0; i < (p - 1); i++) {
-
-    /* Iterate over rows  */
-    for (unsigned int j = 0; j < (p - 1); j++) {
-
-      /* Update indices in sigma_11 */
-      sigma.at(ind_noi[j], ind_noi[i]) = inv_omega_11.at(j, i) + (
-        omega_beta[j] * omega_beta[i] / gamma_param
-      );
-    }
-    
-    /* Update indices in sigma_12 */
-    sigma.at(ind_noi[i], ith) = -omega_beta[i] / gamma_param;
-    sigma.at(ith, ind_noi[i]) = -omega_beta[i] / gamma_param;
-  }
-
-  /* Update sigma_22  */
-  sigma.at(ith, ith) = 1 / gamma_param;
 }

@@ -50,3 +50,6 @@ extern FunctionTimer g_last_col_t3;
 extern FunctionTimer g_last_col_t4;
 extern FunctionTimer g_last_col_t5;
 extern FunctionTimer g_last_col_t6;
+extern FunctionTimer g_last_col_t7;
+extern FunctionTimer g_last_col_t8;
+extern FunctionTimer g_last_col_t9;
