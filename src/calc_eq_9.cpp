@@ -14,9 +14,6 @@ double calc_eq_9(
   const unsigned int nmc
  ) {
 
-  /* Time profiling */
-  g_eq_9_timer.TimerStart();
-
   /* If no nonzero entries of adj matrix last col, we can immediately return 0  */
   double mc_avg_eq_9 = 0;
   if (xdim) {
@@ -27,9 +24,6 @@ double calc_eq_9(
     /* Calculate log mean of multivariate normal density  */
     mc_avg_eq_9 = looping_dmvnrm_arma(x, arma_mean_vecs, arma_inv_sigma_stores);
   }
-
-  /* Time profiling */
-  g_eq_9_timer.TimerEnd();
 
   return mc_avg_eq_9;
 }

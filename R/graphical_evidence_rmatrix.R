@@ -11,7 +11,8 @@ graphical_evidence_rmatrix <- function(
   prior,
   lambda = 0,
   alpha = 0,
-  V = 0
+  V = 0,
+  print_progress = FALSE
 ) {
   
   # Initialize storage for I_{p-j+1} -IV_{p-j+1} for every j from 1 to p
@@ -34,8 +35,9 @@ graphical_evidence_rmatrix <- function(
     # Main BGL loop from 1 to p
     for (num_rmat in 1:p) {
       
-      cat(paste0("Working on ", num_rmat, "th row of the telescoping sum\n"))
-      reset_times()
+      if (print_progress) {
+        cat(paste0("Working on ", num_rmat, "th row of the telescoping sum\n"))
+      }
       
       # Reduce data by one column
       reduced_data_xx <- xx[, 1:(p - num_rmat + 1)]

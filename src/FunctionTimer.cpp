@@ -23,6 +23,12 @@ FunctionTimer g_last_col_t7("g_last_col_t7");
 FunctionTimer g_last_col_t8("g_last_col_t8");
 FunctionTimer g_last_col_t9("g_last_col_t9");
 
+double last_col_conds[50];
+double last_col_min_conds[50];
+double max_calc_time = 0;
+arma::mat inv_c_max_time;
+arma::vec solve_for_max_time;
+
 
 /*
  * Top level function to print currently considered timers

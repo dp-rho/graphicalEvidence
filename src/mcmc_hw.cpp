@@ -30,9 +30,6 @@ List mcmc_hw(
 
   arma::mat sigma = arma::inv_sympd(omega);
 
-  /* Time profiling */
-  g_mcmc_hw_timer.TimerStart();
-
   /* Identify indices where ones and zeros exist for adjacency matrix */
   arma::umat ind_noi_mat(p - 1, p);
   std::vector<arma::uvec> find_which_ones(p);
@@ -62,8 +59,6 @@ List mcmc_hw(
     scale_params[i] = 2 / (s_mat.at(i, i) + scale_mat.at(i, i));
   }
 
-  g_sample_omega_hw.TimerStart();
-
   for (arma::uword i = 0; i < total_iters; i++) {
     sample_omega_hw(
       i, burnin, n, alpha, beta, omega, inv_omega_11, inv_c, omega_save,
@@ -73,21 +68,17 @@ List mcmc_hw(
     );
   }
 
-  g_sample_omega_hw.TimerEnd();
-
   /* Get posterior mean of sampled omega  */
   omega_save /= nmc;
 
-  /* Calcluate mc average equation 9 and return post mean omega as well */
+  /* Calcluate mc average equation 9 in associated paper  */
   double mc_avg_eq_9 = calc_eq_9(
     find_which_ones[p - 1], inv_c_required_store, mean_vec_store,
     omega_save, xdim, p, nmc
   );
 
+  /* Return values to R code  */
   List z = List::create(Rcpp::wrap(omega_save), mc_avg_eq_9);
-
-  /* Time profiling */
-  g_mcmc_hw_timer.TimerEnd();
 
   return z;
 }

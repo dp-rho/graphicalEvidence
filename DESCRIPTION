@@ -8,7 +8,7 @@ Maintainer: David Rowe <david@rowe-stats.com>
 Description: Placeholder.
 License: GPL (>= 2)
 Imports:
-	Rcpp (>= 1.0.12),
+	Rcpp,
 	parallel,
 	RcppXsimd
 LinkingTo: Rcpp, RcppArmadillo

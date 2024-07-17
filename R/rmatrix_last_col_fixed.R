@@ -13,6 +13,9 @@ rmatrix_last_col_fixed <- function(
   post_mean_tau = 0,
   lambda = 0
 ) {
+
+  # Reset compiled timers
+  # reset_times()
   
   # Initialize time to calculate restricted Hao Wang sampler
   start_time_mcmc_last_col <- proc.time()
@@ -34,6 +37,15 @@ rmatrix_last_col_fixed <- function(
   # bind_random_samples_rmatrix(
   #   gamma_vec, rnorm_vec, rgig_vec, c(1)
   # )
+  
+  # if (p < 20) {
+  #   print("S")
+  #   print(S)
+  #   print("post mean omega")
+  #   print(post_mean_omega)
+  #   print("matrix_acc_gibbs")
+  #   print(matrix_acc_gibbs)
+  # }
 
   # RcppArmadillo implementation
   ans_last_col <- mcmc_last_col_rmatrix(
@@ -42,13 +54,19 @@ rmatrix_last_col_fixed <- function(
   )
 
   ##################################
-
-  ### R code time profiling ###
+  
+  # ### R code time profiling ###
   calc_time <- proc.time() - start_time_mcmc_last_col
   g_time_env$mcmc_last_col_calc_time <- (
     g_time_env$mcmc_last_col_calc_time + calc_time
   )
-  ######################
+  # cat("LAST COL CALC TIME: \n")
+  # print_times(1)
+  # print(calc_time)
+  cat("mc avg eq 11\n")
+  print(ans_last_col[[1]])
+  cat("post mean omega 22\n")
+  print(ans_last_col[[3]])
 
   return(list(
     MC_avg_eq_11=ans_last_col[[1]],

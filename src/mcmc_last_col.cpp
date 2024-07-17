@@ -30,9 +30,6 @@ List mcmc_last_col(
   arma::mat gibbs_mat(gibbs_mat_nvec.begin(), p, p);
   arma::mat g_mat_adj(g_mat_adj_nvec.begin(), p, p);
 
-  /* Time profiling */
-  g_mcmc_last_col_timer.TimerStart();
-
   /* Sampler with last column fixed relies on p_reduced sampling  */
   const int p_reduced = p - 1;
 
@@ -82,8 +79,6 @@ List mcmc_last_col(
 
     /* Get random gamma value and calculate omega_22  */
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[p - 1]);
-    
-    g_last_col_t4.TimerStart();
 
     /* Efficient calculation of inv_omega_11_full */
     last_col_calc_inv_omega_11_full(inv_omega_11_full, sigma);
@@ -107,7 +102,6 @@ List mcmc_last_col(
     if (i >= burnin) {
       gamma_subtractors[i - burnin] = gamma_subtractor;
     }
-    g_last_col_t4.TimerEnd();
 
     /* In general case call omega reduced sampler */
     if (p_reduced > 1) {
@@ -127,10 +121,8 @@ List mcmc_last_col(
       );
     }
 
-    g_last_col_t4.TimerStart();
     /* Update sigma's last column and row for next iteration  */
     update_sigma_last_col(sigma, fixed_last_col, omega_22);
-    g_last_col_t4.TimerEnd();
 
     /* Save results if burnin is complete */
     if (i >= burnin) {
@@ -143,16 +135,15 @@ List mcmc_last_col(
   omega_22_acc /= nmc;
   omega_reduced_acc /= nmc;
 
+  /* Calculate equation 11 in paper */
   double mc_avg_eq_11 = calc_eq_11(
     omega_22_acc, shape_param, scale_params[p - 1], nmc, gamma_subtractors
   );
 
+  /* Return values to R code  */
   List z = List::create(
     mc_avg_eq_11, Rcpp::wrap(omega_reduced_acc), omega_22_acc
   );
-
-  /* Time profiling */
-  g_mcmc_last_col_timer.TimerEnd();
 
   return z;
 

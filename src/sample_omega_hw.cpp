@@ -50,14 +50,8 @@ void sample_omega_hw(
       shape_param, scale_params[i]
     );
 
-    /* Time profiling */
-    g_inv_omega_11_hw.TimerStart();
-
     /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p, i);
-
-    /* Time profiling */
-    g_inv_omega_11_hw.TimerEnd();
 
     /* Update ith row and col of omega by calculating beta, if i == (p - 1),  */
     /* and burnin is completed, save results in accumulator variables         */
@@ -79,10 +73,8 @@ void sample_omega_hw(
     /* Calculate mean mu and assign to one indices if they exist */
     if (reduced_dim) {
 
-      g_inv_c_hw.TimerStart();
       /* Case where some ones are found in current col  */
       inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
-      g_inv_c_hw.TimerEnd();
 
       /* Manual memory management, initialize solve for vector to find mu reduced */
       for (unsigned int j = 0; j < reduced_dim; j++) {
@@ -90,18 +82,10 @@ void sample_omega_hw(
         g_vec2[j] = s_mat.at(row_index, i) + scale_mat.at(row_index, i);
       }
 
-      /* Time profiling */
-      g_mu_reduced1_hw.TimerStart();
-
+      /* Solve for mu_i in place  */
       solve_mu_reduced_hw_in_place(
         i, find_which_ones[i], find_which_zeros[i], inv_c
       );
-
-      /* Time profiling */
-      g_mu_reduced1_hw.TimerEnd();
-
-      /* Time profiling */
-      g_mu_reduced2_hw.TimerStart();
 
       /* Store results if the column considered (i) is the last (p) */
       if (((iter - burnin) >= 0) && (i == (p - 1))) {
@@ -114,16 +98,10 @@ void sample_omega_hw(
         memcpy(cur_col, g_vec2, reduced_dim * sizeof(double));
       }
 
-      /* Time profiling */
-      g_mu_reduced2_hw.TimerEnd();
-
       /* Generate random normals in g_vec1  */
       for (unsigned int j = 0; j < reduced_dim; j++) {
         g_vec1[j] = arma::randn();
       }
-
-      /* Time profiling */
-      g_mu_reduced3_hw.TimerStart();
 
       /* Solve chol(inv_c) x = randn(), store result in g_vec1  */
       cblas_dtrsm(
@@ -135,26 +113,17 @@ void sample_omega_hw(
       for (unsigned int j = 0; j < reduced_dim; j++) {
         beta[find_which_ones[i][j]] = g_vec2[j] + g_vec1[j];
       }
-
-      /* Time profiling */
-      g_mu_reduced3_hw.TimerEnd();
     }
 
-    /* Time profiling */
-    g_update_omega_hw1.TimerStart();
+    /* Update omega in place using newly calculated beta  */
     update_omega_inplace(omega, inv_omega_11, beta, ind_noi, gamma_sample, i, p);
-    /* Time profiling */
-    g_update_omega_hw1.TimerEnd();
 
-    /* Time profiling */
-    g_update_omega_hw2.TimerStart();
-
+    /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
+    /* is still stored in global memory g_vec1 from our previous update of omega    */
     update_sigma_inplace(
       sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p, i
     );
 
-    /* Time profiling */
-    g_update_omega_hw2.TimerEnd();
   }
 
   /* If iteration is past burnin period, accumulate Omega */

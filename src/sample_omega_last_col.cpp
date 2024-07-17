@@ -26,10 +26,8 @@ void sample_omega_last_col(
   arma::mat const& last_col_outer
 ) {
 
-  g_last_col_t9.TimerStart();
   /* Tilda parameterization sampling  */
   omega_reduced -= ((1 / omega_pp) * last_col_outer);
-  g_last_col_t9.TimerEnd();
 
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
@@ -44,11 +42,8 @@ void sample_omega_last_col(
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[i]);
 
     /* Update inv_omega_11  */
-    g_last_col_t1.TimerStart();
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p_reduced, i);
-    g_last_col_t1.TimerEnd();
 
-    g_last_col_t7.TimerStart();
     /* Initialize beta indices where zeros occur  */
     for (unsigned int j = 0; j < find_which_zeros[i].n_elem; j++) {
 
@@ -61,17 +56,14 @@ void sample_omega_last_col(
         (last_col_outer.at(ind_noi[which_zero], i) / omega_pp)
       );
     }
-    g_last_col_t7.TimerEnd();
 
     /* Number of ones in the adjacency matrix column  */
     const arma::uword reduced_dim = find_which_ones[i].n_elem;
     int lapack_dim = (int)reduced_dim;
     if (reduced_dim) {
 
-      g_last_col_t8.TimerStart();
       /* Calculate inv_c  */
       inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
-      g_last_col_t8.TimerEnd();
 
       /* Fill global memory with inv_c[which_ones, which_ones]  */
       int assign_index = 0;
@@ -82,9 +74,6 @@ void sample_omega_last_col(
       }
 
       if (find_which_zeros[i].n_elem) {
-
-        /* Time profiling */
-        g_last_col_t3.TimerStart();
 
         /* Update g_vec2 to store V[ind_noi, i] + S[ind_noi, i] +                 */
         /* + Gibbs[reduced_zeros, i].t() * inv_c[reduced_zeros, reduced_ones] +   */
@@ -112,34 +101,23 @@ void sample_omega_last_col(
           dot2 /= omega_pp;
           g_vec2[j] += (dot1 + dot2);
         }
-        g_last_col_t3.TimerEnd();
 
-        g_last_col_t5.TimerStart();
+        /* -mu_i = solve(inv_c, g_vec2), store chol(inv_c) in the pointer of inv_c */
         LAPACK_dposv(
           &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
-        g_last_col_t5.TimerEnd();
-
-        if (info_int > 0) {
-          arma::cout << "LAPACK dposv failed" << arma::endl;
-        }
       
       }
       else {
 
-        /* Time profiling */
-        g_last_col_t3.TimerStart();
-
         for (unsigned int j = 0; j < reduced_dim; j++) {
           g_vec2[j] = arma::randn();
         }
-        g_last_col_t3.TimerEnd();
 
-        g_last_col_t5.TimerStart();
+        /* -mu_i = solve(inv_c, randn()), store chol(inv_c) in the pointer of inv_c */
         LAPACK_dposv(
           &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
         );
-        g_last_col_t5.TimerEnd();
       }
 
       /* Assign random normals to g_vec1 to solve for beta ones */
@@ -147,13 +125,11 @@ void sample_omega_last_col(
         g_vec1[j] = arma::randn();
       }
 
-      g_last_col_t6.TimerStart();
       /* Solve chol(inv_c) x = randn(), store result in g_vec1  */
       cblas_dtrsm(
         CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim, nrhs, one,
         g_mat1, lapack_dim, g_vec1, lapack_dim
       );
-      g_last_col_t6.TimerEnd();
 
       /* Update beta[which_ones] = difference of g_vec1 and g_vec2  */
       for (unsigned int j = 0; j < reduced_dim; j++) {
@@ -161,24 +137,19 @@ void sample_omega_last_col(
       }
     }
 
-    g_last_col_t2.TimerStart();
+    /* Update omega in place using newly calculated beta  */
     update_omega_inplace(
       omega_reduced, inv_omega_11, beta, ind_noi, gamma_sample, i, p_reduced
     );
-    g_last_col_t2.TimerEnd();
 
     /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
     /* is still stored in global memory g_vec1 from our previous update of omega    */
-    g_last_col_t1.TimerStart();
     update_sigma_inplace(
       sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p_reduced, i
     );
-    g_last_col_t1.TimerEnd();
 
   }
 
   /* Update omega reduced with last col outer product */
-  g_last_col_t9.TimerStart();
   omega_reduced += ((1 / omega_pp) * last_col_outer);
-  g_last_col_t9.TimerEnd();
 }

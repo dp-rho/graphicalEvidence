@@ -123,28 +123,19 @@ void sample_omega_last_col_rmatrix(
     }
     
     /* -mu_i = solve(inv_c, solve_for), store chol(inv_c) in the pointer of inv_c */
-    g_last_col_t2.TimerStart();
     LAPACK_dposv(
-      &uplo, &lapack_dim, &nrhs, inv_c.memptr(), &lapack_dim, solve_for.memptr(), 
+      &uplo, &lapack_dim, &nrhs, inv_c.memptr(), &lapack_dim, solve_for.memptr(),
       &lapack_dim, &info_int
     );
-    //arma::vec mu_i = arma::solve(inv_c, solve_for);
-    g_last_col_t2.TimerEnd();
 
     /* Generate random normals needed to solve for beta */
     flex_mem.randn();
-    // extract_rnorm(flex_mem.memptr(), lapack_dim);
-
-    g_last_col_t5.TimerStart();
 
     /* Solve chol(inv_c) x = randn(), store result in flex_mem  */
     cblas_dtrsm(
       CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim,
       nrhs, one, inv_c.memptr(), lapack_dim, flex_mem.memptr(), lapack_dim
     );
-    /* inv_c = arma::chol(inv_c);
-    arma::vec temp = arma::solve(inv_c, flex_mem); */
-    g_last_col_t5.TimerEnd();
 
     /* Update beta  */
     beta = -solve_for + flex_mem;

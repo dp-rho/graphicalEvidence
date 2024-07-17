@@ -15,9 +15,6 @@ double calc_eq_11(
   arma::vec const& gamma_subtractors
 ) {
 
-  /* Time profiling */
-  g_eq_11_timer.TimerStart();
-
   /* Iterate through accumulated gamma subtractors and calculate gamma density  */
   double gamma_acc = 0.0;
   for (arma::uword i = 0; i < nmc; i++) {
@@ -33,9 +30,6 @@ double calc_eq_11(
     }
   }
   gamma_acc /= nmc;
-
-  /* Time profiling */
-  g_eq_11_timer.TimerEnd();
 
   return log(gamma_acc);
 }

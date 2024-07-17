@@ -8,6 +8,7 @@ evidence <- function(
   nmc,
   prior_name = c('Wishart', 'BGL', 'GHS', 'G_Wishart'),
   runs = 1,
+  print_progress = FALSE,
   alpha = NULL,
   lambda = NULL,
   V = NULL,
@@ -69,25 +70,30 @@ evidence <- function(
       # Initial R implementation
       'Wishart' = graphical_evidence_rmatrix(
         xx_perm, S, n, p, burnin, nmc, prior_name, alpha=alpha, V=V_perm,
+        print_progress=print_progress
       ),
       
       # Largely implemented in C++
       'BGL' = graphical_evidence_rmatrix(
-        xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda
+        xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda,
+        print_progress=print_progress
       ),
       
       # Largely implemented in C++
       'GHS' = graphical_evidence_rmatrix(
-        xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda
+        xx_perm, S, n, p, burnin, nmc, prior_name, lambda=lambda,
+        print_progress=print_progress
       ),
       
       # Largely implemented in C++
       'G_Wishart' = graphical_evidence_G_Wishart(
-        xx_perm, S, n, p, burnin, nmc, alpha, V_perm, G_perm
+        xx_perm, S, n, p, burnin, nmc, alpha, V_perm, G_perm,
+        print_progress=print_progress
       )
     )
-    cat("done with run", i, '\n')
-    print(results)
+    if (print_progress) {
+      cat("done with run", i, '\n')
+    }
   }
   
   # Filter out infinite and NA values from results
