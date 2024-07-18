@@ -1,6 +1,6 @@
 
-# R wrapper for compiled code of G_Wishart prior implementation,
-# eventually can be replaced entirely by a call to Rcpp function
+# R function for graphical evidence on G Wishart Prior, calls 
+# C++ code for the computation intensive samplers 
 graphical_evidence_G_Wishart <- function(
   xx,
   S,
@@ -50,11 +50,10 @@ graphical_evidence_G_Wishart <- function(
       # for every iteration we need smaller and smaller blocks of
       # the data matrix xx. When num_G_Wishart = 1, we need the entire
       # matrix xx. When num_G_Wishart = 2, we need the (p-1) x (p-1)
-      # block of the matrix xx. And so on ...
-      # reduced_data_xx <- xx[, permutation_order[1:(p - num_G_Wishart + 1)]]
-      reduced_data_xx <- xx[, 1:(p - num_G_Wishart + 1)]
+      # block of the matrix xx
+      reduced_data_xx <- as.matrix(xx[, 1:(p - num_G_Wishart + 1)])
       p_reduced <- ncol(reduced_data_xx)
-      S_reduced <- t(reduced_data_xx) %*% reduced_data_xx
+      S_reduced <- as.matrix(t(reduced_data_xx) %*% reduced_data_xx)
       
       matrix_accumulator_gibbs <- as.matrix(
         matrix_accumulator[1:p_reduced, 1:p_reduced]
@@ -69,8 +68,6 @@ graphical_evidence_G_Wishart <- function(
       # Run the unrestricted sampler to get samples, which will
       # be used to approximate the Normal density in the
       # evaluation of the term IV_{p-j+1} - Equation (21)
-      
-      # [post_mean_omega, MC_average_Equation_9]
       Hao_wang_results <-  G_wishart_Hao_wang(
         S_reduced, n, burnin, nmc, alpha, scale_matrix_reduced,
         G_mat_adj_reduced, matrix_accumulator_gibbs, start_point_first_gibbs
