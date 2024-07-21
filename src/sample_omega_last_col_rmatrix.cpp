@@ -52,13 +52,9 @@ void sample_omega_last_col_rmatrix(
 
     /* Get sampled gamma value  */
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[i]);
-    // double gamma_sample = extract_rgamma();
 
     /* Update inv_omega_11  */
-    g_last_col_t1.TimerStart();
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p_reduced, i);
-    // inv_omega_11 = arma::inv_sympd(omega_reduced.submat(ind_noi, ind_noi));
-    g_last_col_t1.TimerEnd();
 
     /* Dependent on prior, intialize solve_for in g_vec2*/
     
@@ -123,49 +119,22 @@ void sample_omega_last_col_rmatrix(
     }
     
     /* -mu_i = solve(inv_c, solve_for), store chol(inv_c) in the pointer of inv_c */
-    /* LAPACK_dposv(
+    LAPACK_dposv(
       &uplo, &lapack_dim, &nrhs, inv_c.memptr(), &lapack_dim, solve_for.memptr(), 
       &lapack_dim, &info_int
-    ); */
-
-    // auto m_start = std::chrono::high_resolution_clock::now();
-    g_last_col_t2.TimerStart();
-    arma::vec mu_i = arma::solve(inv_c, solve_for, arma::solve_opts::fast);
-    g_last_col_t2.TimerEnd();
-    /* auto m_stop = std::chrono::high_resolution_clock::now();
-    double cur_cond = arma::rcond(inv_c);
-    double dur = std::chrono::duration_cast<std::chrono::microseconds>(m_stop - m_start).count();
-    if (dur > max_calc_time) {
-      max_calc_time = dur;
-      inv_c_max_time = inv_c;
-      solve_for_max_time = solve_for;
-    }
-    if (cur_cond < last_col_min_conds[i]) {
-      last_col_min_conds[i] = cur_cond;
-    } */
+    );
 
     /* Generate random normals needed to solve for beta */
     flex_mem.randn();
-    // extract_rnorm(flex_mem.memptr(), lapack_dim);
 
-    // g_last_col_t5.TimerStart();
     /* Solve chol(inv_c) x = randn(), store result in flex_mem  */
-    /* cblas_dtrsm(
+    cblas_dtrsm(
       CblasColMajor, CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, lapack_dim,
       nrhs, one, inv_c.memptr(), lapack_dim, flex_mem.memptr(), lapack_dim
-    ); */
-    
-    g_last_col_t6.TimerStart();
-    inv_c = arma::chol(inv_c);
-    g_last_col_t6.TimerEnd();
-
-    g_last_col_t5.TimerStart();
-    arma::vec temp = arma::solve(inv_c, flex_mem);
-    g_last_col_t5.TimerEnd();
+    );
 
     /* Update beta  */
-    // beta = -solve_for + flex_mem;
-    beta = temp - mu_i;
+    beta = -solve_for + flex_mem;
 
     /* Update ith col and row of omega and calculate                          */
     /* omega_22 = gamma_sample + (beta.t() * inv_omega_11 * beta) in flex_mem */
@@ -199,8 +168,6 @@ void sample_omega_last_col_rmatrix(
 
     /* GHS case */
     else if (prior == GHS) {
-      
-      g_last_col_t6.TimerStart();
 
       /* Sample tau_12 and nu_12 */
       for (unsigned int j = 0; j < (p_reduced - 1); j++) {
@@ -210,9 +177,7 @@ void sample_omega_last_col_rmatrix(
         );
 
         const double cur_tau = 1 / g_rgamma.GetSample(1, 1 / cur_rate);
-        // const double cur_tau = 1 / extract_rgamma();
         const double cur_nu = 1 / g_rgamma.GetSample(1, 1 / (1 + (1 / cur_tau)));
-        // const double cur_nu = 1 / extract_rgamma();
 
         tau.at(ind_noi[j], i) = cur_tau;
         tau.at(i, ind_noi[j]) = cur_tau;
@@ -220,16 +185,13 @@ void sample_omega_last_col_rmatrix(
         nu.at(i, ind_noi[j]) = cur_nu;
       }
 
-      g_last_col_t6.TimerEnd();
     }
 
     /* After omega_reduced is updated, update sigma where beta.t() %*% inv_omega_11 */
     /* is still stored in global memory g_vec1 from our previous update of omega    */
-
     update_sigma_inplace(
       sigma, inv_omega_11, g_vec1, ind_noi, gamma_sample, p_reduced, i
     );
-    g_last_col_t1.TimerEnd();
 
   }
 

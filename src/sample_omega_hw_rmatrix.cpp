@@ -59,13 +59,9 @@ void sample_omega_hw_rmatrix(
 
     /* Sample from prior specific gamma density */
     const double gamma_param = g_rgamma.GetSample(shape, scale_vec[i]);
-    // const double gamma_param = extract_rgamma();
 
     /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
-    g_inv_omega_11_hw.TimerStart();
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, cur_sigma, p, i);
-    // inv_omega_11 = arma::inv_sympd(omega.submat(ind_noi, ind_noi));
-    g_inv_omega_11_hw.TimerEnd();
 
     /* Wishart case */
     if (prior == WISHART) {
@@ -117,27 +113,18 @@ void sample_omega_hw_rmatrix(
       inv_c_required_store.slice(iter - burnin) = inv_c;
     }
 
-    g_mu_reduced1_hw.TimerStart();
-
     /* -mu_i = solve(inv_c, solve_for), store chol(inv_c) in the pointer of inv_c */
     LAPACK_dposv(
       &uplo, &dim, &nrhs, inv_c.memptr(), &dim, solve_for.memptr(), &dim, &info_int
     );
-    // flex_mem = -arma::solve(inv_c, solve_for);
 
     /* Save mu_i before memory is used to calculate beta  */
     if (((iter - burnin) >= 0) && (i == (p - 1))) {
       mean_vec_store.col(iter - burnin) = -solve_for;
-      // mean_vec_store.col(iter - burnin) = flex_mem;
     }
-
-    g_mu_reduced1_hw.TimerEnd();
-
-    g_mu_reduced2_hw.TimerStart();
 
     /* Generate random normals needed to solve for beta */
     flex_mem.randn();
-    // solve_for.randn();
 
     /* Solve chol(inv_c) x = randn(), store result in flex_mem  */
     cblas_dtrsm(
@@ -145,23 +132,14 @@ void sample_omega_hw_rmatrix(
       inv_c.memptr(), dim, flex_mem.memptr(), dim
     );
     beta = -solve_for + flex_mem;
-    /* 
-    inv_c = arma::chol(inv_c);
-    beta = flex_mem + arma::solve(inv_c, solve_for); */
 
-    g_mu_reduced2_hw.TimerEnd();
-
-    g_update_omega_hw1.TimerStart();
     /* Update flex_mem to store inv_omega_11 %*% beta */
     update_omega_inplace(omega, inv_omega_11, beta, ind_noi, gamma_param, i, p);
-    g_update_omega_hw1.TimerEnd();
 
     /* Update sigma */
-    g_mu_reduced3_hw.TimerStart();
     update_sigma_inplace(
       cur_sigma, inv_omega_11, flex_mem.memptr(), ind_noi, gamma_param, p, i
     );
-    g_mu_reduced3_hw.TimerEnd();
     
     /* Update sampling parameters for next iteration in prior specific method */
     
@@ -172,7 +150,6 @@ void sample_omega_hw_rmatrix(
 
     /* BGL case */
     else if (prior == BGL) {
-      g_update_omega_hw2.TimerStart();
 
       /* Calculate a_gig_tau and resuse variable to sample tau_12 */
       for (unsigned int j = 0; j < (p - 1); j++) {
@@ -183,13 +160,11 @@ void sample_omega_hw_rmatrix(
         tau.at(i, ind_noi[j]) = gig_tau;
       }
 
-      g_update_omega_hw2.TimerEnd();
     }
 
     /* GHS case */
     else if (prior == GHS) {
 
-      g_update_omega_hw2.TimerStart();
       /* Sample tau_12 and nu_12 */
       for (unsigned int j = 0; j < (p - 1); j++) {
 
@@ -206,9 +181,7 @@ void sample_omega_hw_rmatrix(
         nu.at(i, ind_noi[j]) = cur_nu;
       }
 
-      g_update_omega_hw2.TimerEnd();
     }
-
   }
 
   /* If iteration is past burnin period, accumulate Omega */

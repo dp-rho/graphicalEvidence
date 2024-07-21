@@ -14,9 +14,6 @@ rmatrix_last_col_fixed <- function(
   lambda = 0
 ) {
   
-  # Initialize time to calculate restricted Hao Wang sampler
-  start_time_mcmc_last_col <- proc.time()
-  
   # Get arguments for C++ call
   p <- nrow(S)
   
@@ -38,15 +35,6 @@ rmatrix_last_col_fixed <- function(
   )
 
   ##################################
-  
-  # ### R code time profiling ###
-  calc_time <- proc.time() - start_time_mcmc_last_col
-  g_time_env$mcmc_last_col_calc_time <- (
-    g_time_env$mcmc_last_col_calc_time + calc_time
-  )
-  
-  cat("last col calc time: \n")
-  print(calc_time)
 
   return(list(
     MC_avg_eq_11=ans_last_col[[1]],

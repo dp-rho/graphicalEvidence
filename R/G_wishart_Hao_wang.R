@@ -1,4 +1,4 @@
-
+# Unrestricted Hao Wang sampler for G wishart prior only
 G_wishart_Hao_wang <- function(
   S,
   n,

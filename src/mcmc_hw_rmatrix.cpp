@@ -23,9 +23,6 @@ List mcmc_hw_rmatrix(
   /* Deep copy Rcpp objects to Armadillo constructs */
   arma::mat s_mat(s_mat_nvec.begin(), p, p);
 
-  /* Time profiling */
-  g_mcmc_hw_timer.TimerStart();
-
   /* Create accumulating storage for mcmc sampling  */
   arma::mat mean_vec_store = arma::mat(p - 1, nmc);
   arma::cube inv_c_required_store = arma::cube(p - 1, p - 1, nmc);
@@ -95,9 +92,6 @@ List mcmc_hw_rmatrix(
   );
 
   List z = List::create(Rcpp::wrap(omega_save), Rcpp::wrap(tau_save), mc_avg_eq_9);
-
-  /* Time profiling */
-  g_mcmc_hw_timer.TimerEnd();
 
   return z;
 }

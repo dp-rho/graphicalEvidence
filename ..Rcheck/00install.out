@@ -1,0 +1,13 @@
+* installing *source* package 'graphicalEvidence' ...
+** using non-staged installation via StagedInstall field
+** libs
+make: Nothing to be done for 'all'.
+installing to C:/Users/dprow/gitrepos/graphicalEvidence/..Rcheck/graphicalEvidence/libs/x64
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+* DONE (graphicalEvidence)

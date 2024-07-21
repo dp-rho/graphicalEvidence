@@ -33,9 +33,6 @@ List mcmc_last_col_rmatrix(
   arma::mat tau;
   arma::mat gibbs_mat;
 
-  /* Time profiling */
-  g_mcmc_last_col_timer.TimerStart();
-
   /* Sampler with last column fixed relies on p_reduced sampling  */
   const int p_reduced = p - 1;
 
@@ -117,27 +114,14 @@ List mcmc_last_col_rmatrix(
   arma::vec gamma_subtractors = arma::zeros(nmc);
   double omega_22_acc = 0;
 
-  /* DEBUG 
-  for (unsigned int i = 0; i < 50; i++) {
-    last_col_conds[i] = 0;
-    last_col_min_conds[i] = 1;
-  }
-  max_calc_time = 0; */
-
   /* Perform main loop of mcmc sampling */
   for (arma::uword i = 0; i < (burnin + nmc); i++) {
 
     /* Get random gamma value and calculate omega_22  */
     double gamma_sample = g_rgamma.GetSample(shape_param, scale_params[p - 1]);
-    // double gamma_sample = extract_rgamma();
 
-    /* Copy omega and fixed_last_col to global memory for efficient call to */
-    /* t(fixed_last_col) %*% solve(omega, fixed_last_col)                   */
-    g_last_col_t4.TimerStart();
-
-    /* Efficient calculation of inv_omega_11_full */
+    /* Efficient in place calculation of inv_omega_11_full */
     last_col_calc_inv_omega_11_full(inv_omega_11_full, sigma);
-    // inv_omega_11_full = arma::inv_sympd(omega.submat(0, 0, p - 2, p - 2));
 
     /* Calculate gamma_subtractor and omega_22  */
     double gamma_subtractor = calc_gamma_subtractor(
@@ -158,10 +142,8 @@ List mcmc_last_col_rmatrix(
     if (i >= burnin) {
       gamma_subtractors[i - burnin] = gamma_subtractor;
     }
-    g_last_col_t4.TimerEnd();
 
     /* In general case call omega reduced sampler */
-    g_last_col_t1.TimerStart();
     if (p_reduced > 1) {
       sample_omega_last_col_rmatrix(
         p_reduced, shape_param, scale_params, omega_22, lambda, dof, prior,
@@ -178,12 +160,9 @@ List mcmc_last_col_rmatrix(
         fixed_last_col[0] * fixed_last_col[0] / omega_22
       );
     }
-    g_last_col_t1.TimerEnd();
 
-    g_last_col_t4.TimerStart();
     /* Update sigma's last column and row for next iteration  */
     update_sigma_last_col(sigma, fixed_last_col, omega_22);
-    g_last_col_t4.TimerEnd();
 
     /* Save results if burnin is complete */
     if (i >= burnin) {
@@ -214,9 +193,6 @@ List mcmc_last_col_rmatrix(
   List z = List::create(
     mc_avg_eq_11, Rcpp::wrap(omega_reduced_acc), omega_22_acc
   );
-
-  /* Time profiling */
-  g_mcmc_last_col_timer.TimerEnd();
 
   return z;
 }

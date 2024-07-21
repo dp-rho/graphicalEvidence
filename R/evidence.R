@@ -1,7 +1,49 @@
-
-# R package documentation needed for each parameter
-
-# Top level function that is called by end user
+#' @title Compute Marginal Likelihood using Graphical Evidence
+#' 
+#' @description
+#' Computes the marginal likelihood of input data xx under one of the following
+#' priors: Wishart, Bayesian Graphical Lasso (BGL), 
+#' Graphical Horseshoe (GHS), and G-Wishart, specified under prior_name. 
+#' The number of runs is specified by num_runs, where each run is by default
+#' using a random permutation of the columns of xx, as marginal likelihood 
+#' should be indepdendent of column permutation.
+#' 
+#' @param xx The input data specified by a user for which the marginal 
+#' likelihood is to be calculated. This should be input as a matrix like object
+#' with each individual sample of xx representing one row.
+#' @param burnin The number of iterations the MCMC sampler should iterate 
+#' through and discard before beginning to save results.
+#' @param nmc The number of samples that the MCMC sampler should use to estimate
+#' quantities like posterior mean.
+#' @param prior_name The name of the prior for which the marginal should be 
+#' calculated, this is one of 'Wishart', 'BGL', 'GHS', 'G_Wishart'
+#' @param runs The number of complete runs of the graphical evidence method that
+#' will be executed. Specifying multiple runs allows estimation of the variance
+#' of the estimator and by default will permute the columns of xx such that 
+#' each run uses a random column ordering, as marginal likelihood should be 
+#' independent of column permutations.
+#' @param print_progress A boolean which indicates whether progress should be 
+#' displayed on the console as each row of the telescoping sum is compuated and
+#' each run is completed.
+#' @param alpha A number specifying alpha for the priors of 'Wishart' and 
+#' 'G_Wishart'
+#' @param lambda A number specifying lambda for the priors of 'BGL' and 'GHS'
+#' prior
+#' @param V The scale matrix when specifying 'Wishart' or 'G_Wishart' prior
+#' @param G The adjacency matrix when specifying 'G_Wishart' prior
+#' 
+#' 
+#' @returns A list of results which contains the mean marginal likelihood, the
+#' standard deviation of the estimator, and the raw results in a vector
+#' 
+#' @examples
+#' # Compute the marginal 10 times with random column permutations of xx at each
+#' # individual run for G-Wishart prior using 2,000 burnin and 10,000 sampled
+#' # values at each call to the MCMC sampler
+#' marginal_results <- evidence(
+#'   xx, 2e3, 1e4, 'G_Wishart', 10, alpha=input_alpha, V=input_V, G=input_G
+#' )
+#' @export
 evidence <- function(
   xx,
   burnin,
