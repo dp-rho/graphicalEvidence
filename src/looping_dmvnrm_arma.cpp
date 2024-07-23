@@ -70,7 +70,7 @@ void looping_mvpdf_process_iteration(
 ) {
 
   /* Extract relevant inv sigma and derive sigma  */
-  sigma = arma::inv(inv_sigma_stores.slice(i));
+  sigma = arma::inv_sympd(inv_sigma_stores.slice(i), arma::inv_opts::allow_approx);
 
   /* Multivariate normal PDF  */
 

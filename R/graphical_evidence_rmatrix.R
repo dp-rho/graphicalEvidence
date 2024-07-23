@@ -200,6 +200,11 @@ graphical_evidence_rmatrix <- function(
             sum(abs_lower_tri_est_mat) + p * log(lambda / 2) - 
             (lambda / 2) * sum(diag(reconstructed_matrix))
           )
+          if (p == 2) {
+            direct_eval_log_prior_density <- (
+              direct_eval_log_prior_density - log(0.67)
+            )
+          }
         }
         else if (prior == 'GHS') {
           lower_tri_iterators <- 1:(p * (p - 1) / 2)
@@ -234,13 +239,18 @@ graphical_evidence_rmatrix <- function(
               mean(rand_sample * dawson_num / dawson_denom)
             )
           }
-          # TODO: Add case for p==2
+          
           direct_eval_log_prior_density <- (
             p * (p - 1) / 2 * (log(2) - 1.5 * log(pi)) + 
             sum(log_dawson_vals) - sum(log(abs_lower_tri_vec)) + 
             p * log(1 / (2 * lambda)) - 
             sum(diag(reconstructed_matrix)) / (2 * lambda)
           )
+          if (p == 2) {
+            direct_eval_log_prior_density <- (
+              direct_eval_log_prior_density - log(0.6446)
+            )
+          }
         }
       }
     }

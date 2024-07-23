@@ -1,13 +1,8 @@
 * installing *source* package 'graphicalEvidence' ...
 ** using non-staged installation via StagedInstall field
 ** libs
-make: Nothing to be done for 'all'.
-installing to C:/Users/dprow/gitrepos/graphicalEvidence/..Rcheck/graphicalEvidence/libs/x64
-** R
-** inst
-** byte-compile and prepare package for lazy loading
-** help
-*** installing help indices
-** building package indices
-** testing if installed package can be loaded
-* DONE (graphicalEvidence)
+g++ -std=gnu++11  -I"C:/PROGRA~1/R/R-42~1.2/include" -DNDEBUG  -I'C:/Users/dprow/AppData/Local/R/win-library/4.2/Rcpp/include' -I'C:/Users/dprow/AppData/Local/R/win-library/4.2/RcppArmadillo/include'   -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"  -fopenmp -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -c FunctionTimer.cpp -o FunctionTimer.o
+g++ -std=gnu++11  -I"C:/PROGRA~1/R/R-42~1.2/include" -DNDEBUG  -I'C:/Users/dprow/AppData/Local/R/win-library/4.2/Rcpp/include' -I'C:/Users/dprow/AppData/Local/R/win-library/4.2/RcppArmadillo/include'   -I"C:/rtools42/x86_64-w64-mingw32.static.posix/include"  -fopenmp -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -c GammaSampler.cpp -o GammaSampler.o
+make: *** [C:/PROGRA~1/R/R-42~1.2/etc/x64/Makeconf:260: GammaSampler.o] Interrupt
+
+* removing 'C:/Users/dprow/gitrepos/graphicalEvidence/..Rcheck/graphicalEvidence'

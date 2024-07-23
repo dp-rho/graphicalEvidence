@@ -23,7 +23,7 @@
 #' each run uses a random column ordering, as marginal likelihood should be 
 #' independent of column permutations.
 #' @param print_progress A boolean which indicates whether progress should be 
-#' displayed on the console as each row of the telescoping sum is compuated and
+#' displayed on the console as each row of the telescoping sum is computed and
 #' each run is completed.
 #' @param alpha A number specifying alpha for the priors of 'Wishart' and 
 #' 'G_Wishart'
