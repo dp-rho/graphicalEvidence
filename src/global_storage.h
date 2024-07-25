@@ -6,10 +6,7 @@
 #define WISHART (0)
 #define BGL (1)
 #define GHS (2)
-#define MAX_DIM (100)
-
-/* Parallization sizes  */
-#define PARALLEL_MAT_DIM (150)
+#define MAX_DIM (200)
 
 /* Global info storage/args for manual LAPACK/BLAS calls  */
 extern int info_int;
