@@ -35,9 +35,9 @@ graphical_evidence_G_Wishart <- function(
   matrix_accumulator <- matrix(0, nrow=p, ncol=p)
   
   # Get initial starting point
-  start_point_first_gibbs <- prior_sampling_G_Wishart(
-    p, 5, 5, G, V, alpha
-  )
+  start_point_first_gibbs <- as.matrix(prior_sampler_G_Wishart(
+    p, 9, 1, as.matrix(G), as.matrix(V), alpha
+  ))
 
   # Main graphical evidence loop
   for (num_G_Wishart in 1:p) {

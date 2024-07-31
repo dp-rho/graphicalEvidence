@@ -41,9 +41,17 @@ void solve_mu_reduced_hw_in_place(
   arma::mat const&
 );
 
+/* Functions in prior_sample_omega.cpp  */
+void prior_sample_omega(
+  const int, const int, const int, arma::vec&, arma::mat&,
+  arma::mat&, arma::mat&, arma::cube&, arma::mat const&,
+  arma::umat const&, std::vector<arma::uvec> const&,
+  std::vector<arma::uvec> const&, arma::mat const&, arma::mat&
+);
+
 /* Functions in sample_omega_hw.cpp */
 void sample_omega_hw(
-  const int, const int, const int, const int, arma::vec&,
+  const int, const int, const int, arma::vec&,
   arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
   arma::cube&, arma::mat const&, arma::mat const&, arma::umat const&,
   std::vector<arma::uvec> const&, std::vector<arma::uvec> const&,
@@ -53,7 +61,7 @@ void sample_omega_hw(
 
 /* Functions in sample_omega_hw_rmatrix */
 void sample_omega_hw_rmatrix(
-  const int, const int, const int, const int, const int, const double,
+  const int, const int, const int, const int, const double,
   arma::vec&, arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::mat&,
   arma::mat&, arma::mat&, arma::mat&, arma::mat&, arma::cube&, arma::mat const&,
   arma::umat const&, arma::mat const&, const double, const double*

@@ -101,23 +101,20 @@ void sample_omega_last_col(
           dot2 /= omega_pp;
           g_vec2[j] += (dot1 + dot2);
         }
-
-        /* -mu_i = solve(inv_c, g_vec2), store chol(inv_c) in the pointer of inv_c */
-        LAPACK_dposv(
-          &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
-        );
-      
       }
       else {
 
         for (unsigned int j = 0; j < reduced_dim; j++) {
           g_vec2[j] = arma::randn();
         }
+      }
 
-        /* -mu_i = solve(inv_c, randn()), store chol(inv_c) in the pointer of inv_c */
-        LAPACK_dposv(
-          &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
-        );
+      /* -mu_i = solve(inv_c, g_vec2), store chol(inv_c) in the pointer of inv_c */
+      LAPACK_dposv(
+        &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
+      );
+      if (info_int > 0) {
+        arma::cout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
       }
 
       /* Assign random normals to g_vec1 to solve for beta ones */

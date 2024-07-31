@@ -74,7 +74,7 @@ List mcmc_hw_rmatrix(
   /* Run MCMC */
   for (arma::uword i = 0; i < total_iters; i++) {
     sample_omega_hw_rmatrix(
-      i, burnin, n, prior, dof, lambda, beta, omega, cur_sigma, tau, nu,
+      i, burnin, prior, dof, lambda, beta, omega, cur_sigma, tau, nu,
       inv_omega_11, inv_c, omega_save, tau_save, mean_vec_store,
       inv_c_required_store, gibbs_mat, ind_noi_mat, s_mat, shape, scale_vec
     );

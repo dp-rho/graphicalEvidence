@@ -149,6 +149,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// prior_sampler_G_Wishart
+NumericVector prior_sampler_G_Wishart(int p, int burnin, int nmc, NumericVector g_mat_adj_nvec, NumericVector scale_mat_nvec, int alpha);
+RcppExport SEXP _graphicalEvidence_prior_sampler_G_Wishart(SEXP pSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP g_mat_adj_nvecSEXP, SEXP scale_mat_nvecSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< int >::type nmc(nmcSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type g_mat_adj_nvec(g_mat_adj_nvecSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scale_mat_nvec(scale_mat_nvecSEXP);
+    Rcpp::traits::input_parameter< int >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(prior_sampler_G_Wishart(p, burnin, nmc, g_mat_adj_nvec, scale_mat_nvec, alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
 // set_cores
 void set_cores(const int cores);
 RcppExport SEXP _graphicalEvidence_set_cores(SEXP coresSEXP) {
@@ -180,6 +196,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_mcmc_hw_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_hw_rmatrix, 9},
     {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},
     {"_graphicalEvidence_mcmc_last_col_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_last_col_rmatrix, 12},
+    {"_graphicalEvidence_prior_sampler_G_Wishart", (DL_FUNC) &_graphicalEvidence_prior_sampler_G_Wishart, 6},
     {"_graphicalEvidence_set_cores", (DL_FUNC) &_graphicalEvidence_set_cores, 1},
     {"_graphicalEvidence_set_seed", (DL_FUNC) &_graphicalEvidence_set_seed, 1},
     {NULL, NULL, 0}

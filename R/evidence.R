@@ -109,7 +109,7 @@ evidence <- function(
     results[i] <- switch(
       prior_name,
       
-      # Initial R implementation
+      # Largely implemented in C++
       'Wishart' = graphical_evidence_rmatrix(
         xx_perm, S, n, p, burnin, nmc, prior_name, alpha=alpha, V=V_perm,
         print_progress=print_progress

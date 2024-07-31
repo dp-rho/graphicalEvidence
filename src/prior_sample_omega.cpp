@@ -2,12 +2,12 @@
 
 
 /*
- * Sample Omega using Hao Wang decomposition Wang decomposition MCMC sampling.
- * Updates omega accumulator, inv_c accumulator, and mean_vec accumulator as 
- * determined by iterations exceeding burnin period, G-Wishart prior
+ * Sample Omega for prior sampling of G Wishart using special case of 
+ * Hao Wang decomposition Wang decomposition MCMC sampling, recording
+ * the sampled values after burnin in omega_save
  */
 
-void sample_omega_hw(
+void prior_sample_omega(
   const int iter,
   const int burnin,
   const int alpha,
@@ -15,23 +15,17 @@ void sample_omega_hw(
   arma::mat& omega,
   arma::mat& inv_omega_11,
   arma::mat& inv_c,
-  arma::mat& omega_save,
-  arma::mat& mean_vec_store,
-  arma::cube& inv_c_required_store,
-  arma::mat const& gibbs_mat,
+  arma::cube& omega_save,
   arma::mat const& g_mat_adj,
   arma::umat const& ind_noi_mat,
   std::vector<arma::uvec> const& find_which_ones,
   std::vector<arma::uvec> const& find_which_zeros,
   arma::mat const& scale_mat,
-  arma::mat const& s_mat,
-  arma::mat& sigma,
-  const double shape_param,
-  const double* scale_params
+  arma::mat& sigma
 ) {
 
   /* Number of cols to be iterated through  */
-  arma::uword const p = s_mat.n_rows;
+  arma::uword const p = omega.n_rows;
 
   /* Allow selection of all elements besides the ith element  */
   arma::uvec ind_noi;
@@ -46,56 +40,44 @@ void sample_omega_hw(
 
     /* Generate random gamma sample based */
     const double gamma_sample = g_rgamma.GetSample(
-      shape_param, scale_params[i]
+      alpha + 1, 2 / scale_mat.at(i, i)
     );
 
     /* Inverse of omega excluding row i and col i can be solved in O(n^2) */
     efficient_inv_omega_11_calc(inv_omega_11, ind_noi, sigma, p, i);
 
-    /* Update ith row and col of omega by calculating beta, if i == (p - 1),  */
-    /* and burnin is completed, save results in accumulator variables         */
+    /* Update ith row and col of omega by calculating beta  */
 
     /* Fill in any zero indices (may be empty) to beta  */
     for (unsigned int j = 0; j < find_which_zeros[i].n_elem; j++) {
 
-      /* Current index of zero  */
-      const unsigned int which_zero = find_which_zeros[i][j];
-
-      /* Store vec_acc_21 in g_vec1 */
-      const double extracted_gibbs = -gibbs_mat.at(ind_noi[which_zero], i);
-      g_vec1[j] = extracted_gibbs;
+      /* Set relevant indices to 0 in g_vec1, note that g_vec1  */
+      /* will be called to update solve_for when solving for    */
+      /* mu_i_reduced, although this step is not needed in      */
+      /* the prior sampling case, so by setting to 0 that step  */
+      /* has no affect on the output                            */
+      g_vec1[j] = 0;
 
       /* Set vec to relevant elements of beta */
-      beta[which_zero] = extracted_gibbs;
+      beta[find_which_zeros[i][j]] = 0;
     }
 
     /* Calculate mean mu and assign to one indices if they exist */
     if (reduced_dim) {
 
       /* Case where some ones are found in current col  */
-      inv_c = inv_omega_11 * (scale_mat.at(i, i) + s_mat.at(i, i));
+      inv_c = inv_omega_11 * scale_mat.at(i, i);
 
       /* Manual memory management, initialize solve for vector to find mu reduced */
       for (unsigned int j = 0; j < reduced_dim; j++) {
         int row_index = ind_noi_mat.at(find_which_ones[i][j], i);
-        g_vec2[j] = s_mat.at(row_index, i) + scale_mat.at(row_index, i);
+        g_vec2[j] = scale_mat.at(row_index, i);
       }
 
       /* Solve for mu_i in place  */
       solve_mu_reduced_hw_in_place(
         i, find_which_ones[i], find_which_zeros[i], inv_c
       );
-
-      /* Store results if the column considered (i) is the last (p) */
-      if (((iter - burnin) >= 0) && (i == (p - 1))) {
-
-        inv_c_required_store.slice((iter - burnin)) = inv_c.submat(
-          find_which_ones[i], find_which_ones[i]
-        );
-
-        double* cur_col = mean_vec_store.colptr(iter - burnin);
-        memcpy(cur_col, g_vec2, reduced_dim * sizeof(double));
-      }
 
       /* Generate random normals in g_vec1  */
       for (unsigned int j = 0; j < reduced_dim; j++) {
@@ -125,9 +107,9 @@ void sample_omega_hw(
 
   }
 
-  /* If iteration is past burnin period, accumulate Omega */
+  /* If iteration is past burnin period, save omega */
   if ((iter - burnin) >= 0) {
-    omega_save += omega;
+    omega_save.slice(iter - burnin) = omega;
   }
-  
+
 }

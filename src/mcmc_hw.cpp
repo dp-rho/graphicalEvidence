@@ -59,9 +59,10 @@ List mcmc_hw(
     scale_params[i] = 2 / (s_mat.at(i, i) + scale_mat.at(i, i));
   }
 
+  /* Iterate and update omega */
   for (arma::uword i = 0; i < total_iters; i++) {
     sample_omega_hw(
-      i, burnin, n, alpha, beta, omega, inv_omega_11, inv_c, omega_save,
+      i, burnin, alpha, beta, omega, inv_omega_11, inv_c, omega_save,
       mean_vec_store, inv_c_required_store, gibbs_mat, g_mat_adj, ind_noi_mat,
       find_which_ones, find_which_zeros, scale_mat, s_mat, sigma, shape_param,
       scale_params

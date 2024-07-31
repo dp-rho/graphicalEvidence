@@ -11,7 +11,6 @@
 void sample_omega_hw_rmatrix(
   const int iter,
   const int burnin,
-  const int n,
   const int prior,
   const int dof,
   const double lambda,
@@ -117,6 +116,9 @@ void sample_omega_hw_rmatrix(
     LAPACK_dposv(
       &uplo, &dim, &nrhs, inv_c.memptr(), &dim, solve_for.memptr(), &dim, &info_int
     );
+    if (info_int > 0) {
+      arma::cout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
+    }
 
     /* Save mu_i before memory is used to calculate beta  */
     if (((iter - burnin) >= 0) && (i == (p - 1))) {

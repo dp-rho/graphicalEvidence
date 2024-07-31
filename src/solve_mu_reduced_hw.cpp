@@ -45,7 +45,7 @@ void in_place_solve_mu_reduced(
     &uplo, &dim, &nrhs, g_mat1, &dim, g_vec2, &dim, &info_int
   );
   if (info_int > 0) {
-    arma::cout << "LAPACK dposv failed" << arma::endl;
+    arma::cout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
   }
 
   /* Result has to be multiplied by -1  */

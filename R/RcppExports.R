@@ -37,6 +37,10 @@ mcmc_last_col_rmatrix <- function(n, burnin, nmc, p, dof, lambda, prior, fixed_l
     .Call(`_graphicalEvidence_mcmc_last_col_rmatrix`, n, burnin, nmc, p, dof, lambda, prior, fixed_last_col_nvec, s_mat_nvec, tau_mat_nvec, gibbs_mat_nvec, post_mean_omega_nvec)
 }
 
+prior_sampler_G_Wishart <- function(p, burnin, nmc, g_mat_adj_nvec, scale_mat_nvec, alpha) {
+    .Call(`_graphicalEvidence_prior_sampler_G_Wishart`, p, burnin, nmc, g_mat_adj_nvec, scale_mat_nvec, alpha)
+}
+
 set_cores <- function(cores) {
     invisible(.Call(`_graphicalEvidence_set_cores`, cores))
 }
