@@ -2,8 +2,8 @@
 
 
 /*
- * Use Hao Wang decomposition to run an MCMC sampler nmc + burnin times
- * and return the last nmc iterations 
+ * Use graphicalEvidence to run an MCMC sampler nmc + burnin times
+ * and return the last nmc iterations for G Wishart prior sampling
  */
  // [[Rcpp::export]]
 NumericVector prior_sampler_G_Wishart(

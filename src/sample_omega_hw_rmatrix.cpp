@@ -104,7 +104,6 @@ void sample_omega_hw_rmatrix(
           gibbs_mat.at(ind_noi[j], i) / (tau.at(ind_noi[j], i) * lambda_sq)
         );
       }
-
     }
 
     /* Save inv_c before solving for chol(inv_c)  */

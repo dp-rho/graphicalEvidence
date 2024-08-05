@@ -49,6 +49,14 @@ void prior_sample_omega(
   std::vector<arma::uvec> const&, arma::mat const&, arma::mat&
 );
 
+/* Functions in prior_sample_omega_rmatrix.cpp  */
+void prior_sample_omega_rmatirx(
+  const int, const int, const double, const int,
+  const double, arma::vec&, arma::mat&, arma::mat&,
+  arma::mat&, arma::cube&, arma::umat const&, arma::mat&,
+  arma::mat&, arma::mat&
+);
+
 /* Functions in sample_omega_hw.cpp */
 void sample_omega_hw(
   const int, const int, const int, arma::vec&,

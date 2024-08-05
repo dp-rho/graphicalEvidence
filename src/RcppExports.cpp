@@ -165,6 +165,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// prior_sampler_rmatrix
+NumericVector prior_sampler_rmatrix(int p, int burnin, int nmc, int prior, double lambda);
+RcppExport SEXP _graphicalEvidence_prior_sampler_rmatrix(SEXP pSEXP, SEXP burninSEXP, SEXP nmcSEXP, SEXP priorSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< int >::type nmc(nmcSEXP);
+    Rcpp::traits::input_parameter< int >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(prior_sampler_rmatrix(p, burnin, nmc, prior, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // set_cores
 void set_cores(const int cores);
 RcppExport SEXP _graphicalEvidence_set_cores(SEXP coresSEXP) {
@@ -197,6 +212,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},
     {"_graphicalEvidence_mcmc_last_col_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_last_col_rmatrix, 12},
     {"_graphicalEvidence_prior_sampler_G_Wishart", (DL_FUNC) &_graphicalEvidence_prior_sampler_G_Wishart, 6},
+    {"_graphicalEvidence_prior_sampler_rmatrix", (DL_FUNC) &_graphicalEvidence_prior_sampler_rmatrix, 5},
     {"_graphicalEvidence_set_cores", (DL_FUNC) &_graphicalEvidence_set_cores, 1},
     {"_graphicalEvidence_set_seed", (DL_FUNC) &_graphicalEvidence_set_seed, 1},
     {NULL, NULL, 0}

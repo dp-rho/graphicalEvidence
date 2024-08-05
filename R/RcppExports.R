@@ -41,6 +41,10 @@ prior_sampler_G_Wishart <- function(p, burnin, nmc, g_mat_adj_nvec, scale_mat_nv
     .Call(`_graphicalEvidence_prior_sampler_G_Wishart`, p, burnin, nmc, g_mat_adj_nvec, scale_mat_nvec, alpha)
 }
 
+prior_sampler_rmatrix <- function(p, burnin, nmc, prior, lambda) {
+    .Call(`_graphicalEvidence_prior_sampler_rmatrix`, p, burnin, nmc, prior, lambda)
+}
+
 set_cores <- function(cores) {
     invisible(.Call(`_graphicalEvidence_set_cores`, cores))
 }

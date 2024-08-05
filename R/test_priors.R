@@ -126,6 +126,58 @@ test_sampling_G_Wishart <- function(num_samples) {
 
 }
 
+test_sampling_BGL <- function(num_samples) {
+  
+  # Save start in R program time
+  our_time <- proc.time()
+  
+  res <- prior_sampling(
+    5, num_samples / 2, num_samples / 2, 'BGL', seed=42, lambda=2
+  )
+  
+  # Cumulative execution time in R program
+  cat('For p=5 (',num_samples,  ' samples ): execution time in R program (seconds):\n')
+  print((proc.time() - our_time))
+  
+  # Save start in R program time
+  our_time <- proc.time()
+  
+  res <- graphicalEvidence::prior_sampling(
+    50, num_samples / 2, num_samples / 2, 'BGL', seed=42, lambda=140
+  )
+  
+  # Cumulative execution time in R program
+  cat('For p=50 (',num_samples,  ' samples ): execution time in R program (seconds):\n')
+  print((proc.time() - our_time))
+  
+}
+
+test_sampling_GHS <- function(num_samples) {
+  
+  # Save start in R program time
+  our_time <- proc.time()
+  
+  res <- prior_sampling(
+    5, num_samples / 2, num_samples / 2, 'GHS', seed=42, lambda=2
+  )
+  
+  # Cumulative execution time in R program
+  cat('For p=5 (',num_samples,  ' samples ): execution time in R program (seconds):\n')
+  print((proc.time() - our_time))
+  
+  # Save start in R program time
+  our_time <- proc.time()
+  
+  res <- graphicalEvidence::prior_sampling(
+    50, num_samples / 2, num_samples / 2, 'GHS', seed=42, lambda=140
+  )
+  
+  # Cumulative execution time in R program
+  cat('For p=50 (',num_samples,  ' samples ): execution time in R program (seconds):\n')
+  print((proc.time() - our_time))
+  
+}
+
 test_G_Wishart <- function(num_runs) {
   
   # Get predetermined test inputs generated in MATLAB

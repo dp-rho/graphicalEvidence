@@ -41,7 +41,7 @@ List mcmc_hw_rmatrix(
 
   /* Create variables updated through mcmc interation */
   arma::mat omega = arma::eye(p, p);
-  arma::mat cur_sigma = arma::inv(omega);
+  arma::mat cur_sigma = arma::inv_sympd(omega);
   arma::mat tau;
   arma::mat nu;
 

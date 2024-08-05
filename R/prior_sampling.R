@@ -22,6 +22,12 @@ prior_sampling <- function(
     set.seed(seed)
     set_seed(seed)
   }
+  
+  coded_prior <- switch(
+    prior_name,
+    'BGL' = 1,
+    'GHS'= 2
+  )
 
   # Draw samples using compiled sampler dependent on prior
   sampled_omegas <- switch(
@@ -29,12 +35,12 @@ prior_sampling <- function(
     
     # Implemented in C++
     'BGL' = prior_sampler_rmatrix(
-      p, burnin_prior, nmc_prior, prior_name, lambda
+      p, burnin_prior, nmc_prior, coded_prior, lambda
     ),
     
     # Implemented in C++
     'GHS' = prior_sampler_rmatrix(
-      p, burnin_prior, nmc_prior, prior_name, lambda
+      p, burnin_prior, nmc_prior, coded_prior, lambda
     ),
     
     # Implemented in C++
