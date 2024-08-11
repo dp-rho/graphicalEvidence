@@ -144,13 +144,8 @@ void sample_omega_hw_rmatrix(
     
     /* Update sampling parameters for next iteration in prior specific method */
     
-    /* Wishart case */
-    if (prior == WISHART) {
-      /* TODO: Wishart */
-    }
-
     /* BGL case */
-    else if (prior == BGL) {
+    if (prior == BGL) {
 
       /* Calculate a_gig_tau and resuse variable to sample tau_12 */
       for (unsigned int j = 0; j < (p - 1); j++) {
@@ -163,7 +158,7 @@ void sample_omega_hw_rmatrix(
 
     }
 
-    /* GHS case */
+    /* GHS case */ 
     else if (prior == GHS) {
 
       /* Sample tau_12 and nu_12 */
@@ -188,7 +183,9 @@ void sample_omega_hw_rmatrix(
   /* If iteration is past burnin period, accumulate Omega */
   if ((iter - burnin) >= 0) {
     omega_save += omega;
-    tau_save += tau;
+    if (prior != WISHART) {
+      tau_save += tau;
+    }
   }
 
 }

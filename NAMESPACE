@@ -1,3 +1,4 @@
 useDynLib(graphicalEvidence, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
+importFrom(foreach, "%dopar%")
 exportPattern("^[[:alpha:]]+")

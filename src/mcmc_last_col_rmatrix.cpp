@@ -170,17 +170,6 @@ List mcmc_last_col_rmatrix(
       omega_reduced_acc += omega;
     }
   }
-  /* 
-  if (p_reduced < 20) {
-    for (unsigned int i = 0; i < p_reduced; i++) {
-      last_col_conds[i] /= nmc;
-      // arma::cout << "avg cond of " << i << ": " << last_col_conds[i] << arma::endl;
-      arma::cout << "min cond of " << i << ": " << last_col_min_conds[i] << arma::endl;
-    }
-    arma::cout << "max calc time and mat/vec: " << max_calc_time << arma::endl;
-    arma::cout << inv_c_max_time << arma::endl;
-    arma::cout << solve_for_max_time << arma::endl;
-  } */
 
   /* Get posterior means of sampled values */
   omega_22_acc /= nmc;

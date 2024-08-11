@@ -60,9 +60,11 @@ evidence <- function(
   # Match arg on prior name
   prior_name <- match.arg(prior_name)
   
-  # Detect available cores and assign to compiled program
+  # Detect available cores and assign to both R program and compiled program
   num_cores <- parallel::detectCores()
   set_cores(num_cores)
+  cl <- parallel::makeCluster(num_cores)
+  doParallel::registerDoParallel(cl)
   
   # Extract sample size and dimension of xx
   xx <- as.matrix(xx)
@@ -137,6 +139,9 @@ evidence <- function(
       cat("done with run", i, '\n')
     }
   }
+  
+  # End parallel cluster
+  parallel::stopCluster(cl)
   
   # Filter out infinite and NA values from results
   init_len <- length(results)

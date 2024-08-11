@@ -61,7 +61,12 @@ void sample_omega_last_col_rmatrix(
     /* Wishart case */
     if (prior == WISHART) {
 
-      /* Not implemented  */
+      inv_c = inv_omega_11 * (s_mat.at(i, i) + 1);
+
+      /* Solve for vector is just S_21 in Wishart  */
+      for (unsigned int j = 0; j < (p_reduced - 1); j++) {
+        solve_for[j] = s_mat.at(i, ind_noi[j]);
+      }
     }
     
     /* BGL case */
@@ -115,7 +120,6 @@ void sample_omega_last_col_rmatrix(
         );
       }
 
-      // arma::cout << "compiled solve for (mu_i):\n " << solve_for << arma::endl;
     }
     
     /* -mu_i = solve(inv_c, solve_for), store chol(inv_c) in the pointer of inv_c */
@@ -146,14 +150,9 @@ void sample_omega_last_col_rmatrix(
     );
 
     /* Conditional on prior, update sampling memory */
-    
-    /* Wishart case */
-    if (prior == WISHART) {
-      /* TODO: Wishart*/
-    }
 
     /* BGL case */
-    else if (prior == BGL) {
+    if (prior == BGL) {
       
       /* Calculate a_gig_tau and resuse variable to sample tau_12 */
       for (unsigned int j = 0; j < (p_reduced - 1); j++) {

@@ -10,6 +10,8 @@ License: GPL (>= 2)
 Imports:
 	Rcpp,
 	parallel,
+	doParallel,
+	foreach,
 	RcppXsimd
 LinkingTo: Rcpp, RcppArmadillo
 StagedInstall: no
