@@ -1,11 +1,36 @@
-
-# R function for graphical evidence on G Wishart Prior, calls 
-# C++ code for the computation intensive samplers 
+#' @title Compute Marginal Likelihood using Graphical Evidence under G Wishart
+#' 
+#' @description
+#' Computes the marginal likelihood of input data xx under G-Wishart prior using
+#' graphical evidence.
+#' 
+#' @param xx The input data specified by a user for which the marginal 
+#' likelihood is to be calculated. This should be input as a matrix like object
+#' with each individual sample of xx representing one row
+#' @param burnin The number of iterations the MCMC sampler should iterate 
+#' through and discard before beginning to save results
+#' @param nmc The number of samples that the MCMC sampler should use to estimate
+#' marginal likelihood
+#' @param alpha A number specifying alpha for G-Wishart prior
+#' @param V The scale matrix of G-Wishart prior
+#' @param G The adjacency matrix of G-Wishart prior
+#' @param print_progress A boolean which indicates whether progress should be 
+#' displayed on the console as each row of the telescoping sum is computed
+#' 
+#' 
+#' @returns An estimate for the marginal likelihood under G-Wishart prior with
+#' the specified parameters
+#' 
+#' @examples
+#' # Compute the marginal likelihood of xx at each for G-Wishart prior using 
+#' 2,000 burnin and 10,000 sampled values at each call to the MCMC sampler
+#' g_params <- gen_params_G_Wishart()
+#' marginal_results <- graphical_evidence_G_Wishart(
+#'   g_params$x_mat, 2e3, 1e4, 2, g_params$scale_mat, G=g_params$g_mat
+#' )
+#' @export
 graphical_evidence_G_Wishart <- function(
   xx,
-  S,
-  n,
-  p,
   burnin,
   nmc,
   alpha,
@@ -13,6 +38,13 @@ graphical_evidence_G_Wishart <- function(
   G,
   print_progress = FALSE
 ) {
+  
+  # Calculate sample covariance matrix
+  S <- as.matrix(t(xx) %*% xx)
+  
+  # Extract n and p
+  n <- nrow(xx)
+  p <- ncol(xx)
   
   # Initialize storage locations
   log_ratio_of_liklelihoods <- rep(0, p)

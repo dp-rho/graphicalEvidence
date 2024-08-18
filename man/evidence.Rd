@@ -11,6 +11,7 @@ evidence(
   prior_name = c("Wishart", "BGL", "GHS", "G_Wishart"),
   runs = 1,
   print_progress = FALSE,
+  permute_columns = TRUE,
   alpha = NULL,
   lambda = NULL,
   V = NULL,
@@ -20,13 +21,13 @@ evidence(
 \arguments{
 \item{xx}{The input data specified by a user for which the marginal 
 likelihood is to be calculated. This should be input as a matrix like object
-with each individual sample of xx representing one row.}
+with each individual sample of xx representing one row}
 
 \item{burnin}{The number of iterations the MCMC sampler should iterate 
-through and discard before beginning to save results.}
+through and discard before beginning to save results}
 
 \item{nmc}{The number of samples that the MCMC sampler should use to estimate
-quantities like posterior mean.}
+marginal likelihood}
 
 \item{prior_name}{The name of the prior for which the marginal should be 
 calculated, this is one of 'Wishart', 'BGL', 'GHS', 'G_Wishart'}
@@ -35,11 +36,15 @@ calculated, this is one of 'Wishart', 'BGL', 'GHS', 'G_Wishart'}
 will be executed. Specifying multiple runs allows estimation of the variance
 of the estimator and by default will permute the columns of xx such that 
 each run uses a random column ordering, as marginal likelihood should be 
-independent of column permutations.}
+independent of column permutations}
 
 \item{print_progress}{A boolean which indicates whether progress should be 
-displayed on the console as each row of the telescoping sum is compuated and
-each run is completed.}
+displayed on the console as each row of the telescoping sum is computed and
+each run is completed}
+
+\item{permute_columns}{A boolean which indicates whether columns of xx for
+runs beyond the first should be randomly permuted to ensure that 
+marginal calculation is consistent across different column permutations}
 
 \item{alpha}{A number specifying alpha for the priors of 'Wishart' and 
 'G_Wishart'}
@@ -61,13 +66,15 @@ priors: Wishart, Bayesian Graphical Lasso (BGL),
 Graphical Horseshoe (GHS), and G-Wishart, specified under prior_name. 
 The number of runs is specified by num_runs, where each run is by default
 using a random permutation of the columns of xx, as marginal likelihood 
-should be indepdendent of column permutation.
+should be independent of column permutation.
 }
 \examples{
 # Compute the marginal 10 times with random column permutations of xx at each
 # individual run for G-Wishart prior using 2,000 burnin and 10,000 sampled
 # values at each call to the MCMC sampler
+g_params <- gen_params_G_Wishart()
 marginal_results <- evidence(
-  xx, 2e3, 1e4, 'G_Wishart', 10, alpha=input_alpha, V=input_V, G=input_G
+  g_params$x_mat, 2e3, 1e4, 'G_Wishart', 10, alpha=2, 
+  V=g_params$scale_mat, G=g_params$g_mat
 )
 }

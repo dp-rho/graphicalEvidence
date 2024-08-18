@@ -1,4 +1,35 @@
-
+#' graphical_evidence_rmatrix_last_iter
+#' 
+#' Compute the log ratio of likelihood for the  of input data xx, labeled as 
+#' term III in associated paper for the final iteration and then compute
+#' the direct evaluation of the log prior density
+#' 
+#' @param xx The input data specified by a user for which the marginal 
+#' likelihood is to be calculated. This should be input as a matrix like object
+#' with each individual sample of xx representing one row
+#' @param S the sample covariance matrix of the data xx
+#' @param n the number of samples, in this case rows, of the data xx
+#' @param p the dimension, in this case the number of columns, of the data xx
+#' @param burnin The number of iterations the MCMC sampler should iterate 
+#' through and discard before beginning to save results
+#' @param nmc The number of samples that the MCMC sampler should use to estimate
+#' marginal likelihood
+#' @param prior The name of the prior for which the marginal should be 
+#' calculated, this is one of 'Wishart', 'BGL', 'GHS'
+#' @param lambda A number specifying lambda for the priors of 'BGL' and 'GHS'
+#' prior
+#' @param alpha A number specifying alpha for the priors of 'Wishart'
+#' @param V The scale matrix when specifying 'Wishart'
+#' @param print_progress A boolean which indicates whether progress should be 
+#' displayed on the console as each row of the telescoping sum is computed
+#' @param matrix_acc the accumulated changes of previous calls
+#' to updating omega created by storing a modified outer product of the last
+#' column
+#' 
+#' @returns The sum of the log ratio of likelihood (term III) and the direct
+#' evaluation of the log prior density
+#' @keywords internal
+#' @noRd
 graphical_evidence_rmatrix_last_iter <- function(
   xx,
   S,

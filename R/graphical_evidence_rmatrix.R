@@ -1,19 +1,62 @@
-# Top level function for all priors which use the reconstructed matrix
-# method to evaluate log prior density directly, specifically, 
-# Wishart, BGL, and GHS
+#' @title Compute Marginal Likelihood using Graphical Evidence for Wishart,
+#' BGL, and GHS
+#' 
+#' @description
+#' Computes the marginal likelihood of input data xx under one of the following
+#' priors: Wishart, Bayesian Graphical Lasso (BGL), and Graphical Horseshoe 
+#' (GHS), specified under prior_name. 
+#' 
+#' @param xx The input data specified by a user for which the marginal 
+#' likelihood is to be calculated. This should be input as a matrix like object
+#' with each individual sample of xx representing one row
+#' @param burnin The number of iterations the MCMC sampler should iterate 
+#' through and discard before beginning to save results
+#' @param nmc The number of samples that the MCMC sampler should use to estimate
+#' marginal likelihood
+#' @param prior_name The name of the prior for which the marginal should be 
+#' calculated, this is one of 'Wishart', 'BGL', 'GHS'
+#' @param print_progress A boolean which indicates whether progress should be 
+#' displayed on the console as each row of the telescoping sum is computed
+#' @param permute_columns A boolean which indicates whether columns of xx for
+#' runs beyond the first should be randomly permuted to ensure that 
+#' marginal calculation is consistent across different column permutations
+#' @param alpha A number specifying alpha for the priors of 'Wishart'
+#' @param lambda A number specifying lambda for the priors of 'BGL' and 'GHS'
+#' prior
+#' @param V The scale matrix when specifying 'Wishart'
+#' 
+#' 
+#' @returns An estimate for the marginal likelihood under specified prior with
+#' the specified parameters
+#' 
+#' @examples
+#' # Compute the marginal likelihood of xx at each for GHS prior using 1,000 
+#' burnin and 5,000 sampled values at each call to the MCMC sampler
+#' g_params <- gen_params_GHS()
+#' marginal_results <- graphical_evidence_rmatrix(
+#'   g_params$x_mat, 1e3, 5e3, 'GHS', lambda=1
+#' )
+#' @export
 graphical_evidence_rmatrix <- function(
   xx,
-  S,
-  n,
-  p,
   burnin,
   nmc,
-  prior,
+  prior_name = c('Wishart', 'BGL', 'GHS'),
   lambda = 0,
   alpha = 0,
   V = 0,
   print_progress = FALSE
 ) {
+  
+  # Match arg on prior name
+  prior_name <- match.arg(prior_name)
+  
+  # Calculate sample covariance matrix
+  S <- as.matrix(t(xx) %*% xx)
+  
+  # Extract n and p
+  n <- nrow(xx)
+  p <- ncol(xx)
   
   # Ensure scale matrix is matrix type
   V <- as.matrix(V)
@@ -28,15 +71,15 @@ graphical_evidence_rmatrix <- function(
     # storage of posterior means
     last_col_store <- vector("list", length = p)
     
-    # Accumulator for linear shifts
+    # Accumulator for shifts
     matrix_acc <- matrix(numeric(p * p), nrow=p)
     
     # Main loop from 1 to p, for Wishart only this can be run in parallel
-    if (prior != 'Wishart') { 
+    if ((prior_name != 'Wishart') | (p < 15)) { 
       for (num_rmat in 1:(p - 1)) {
         
         updated_density <- graphical_evidence_rmatrix_iteration(
-          xx, S, n, p, burnin, nmc, prior, lambda, alpha, V, print_progress,
+          xx, S, n, p, burnin, nmc, prior_name, lambda, alpha, V, print_progress,
           matrix_acc, num_rmat
         )
         
@@ -47,7 +90,7 @@ graphical_evidence_rmatrix <- function(
 
       # Calculate final iteration
       direct_eval_log_prior_density <- graphical_evidence_rmatrix_last_iter(
-        xx, S, n, p, nmc, prior, lambda, alpha, V, last_col_store, matrix_acc
+        xx, S, n, p, nmc, prior_name, lambda, alpha, V, last_col_store, matrix_acc
       )
       
       return(sum(log_ratio_of_likelihood) + direct_eval_log_prior_density)
@@ -58,7 +101,7 @@ graphical_evidence_rmatrix <- function(
       par_res <- foreach::foreach(num_rmat = 1:(p - 1)) %dopar% {
         
         graphical_evidence_rmatrix_iteration(
-          xx, S, n, p, burnin, nmc, prior, lambda, alpha, V, print_progress,
+          xx, S, n, p, burnin, nmc, prior_name, lambda, alpha, V, print_progress,
           matrix_acc, num_rmat
         )
       }
@@ -71,7 +114,8 @@ graphical_evidence_rmatrix <- function(
       
       # Calculate final iteration
       direct_eval_log_prior_density <- graphical_evidence_rmatrix_last_iter(
-        xx, S, n, p, nmc, prior, lambda, alpha, V, last_col_store, matrix_acc
+        xx, S, n, p, nmc, prior_name, lambda, alpha, V, last_col_store, 
+        matrix_acc
       )
 
       return(sum(log_ratio_of_likelihood) + direct_eval_log_prior_density)
