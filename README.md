@@ -112,7 +112,7 @@ To make results reproducible, it is not sufficient to use the R function `set.se
 > set_seed_evidence(123456789)
 > evidence(
 	xx=g_params$x_mat, burnin=1e3, nmc=5e3, prior_name='Wishart', 
-    runs=10, alpha=7, V=g_params$scale_mat,
+	runs=10, alpha=7, V=g_params$scale_mat,
 )
 $mean
 [1] -84.13947
