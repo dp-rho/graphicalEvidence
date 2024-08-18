@@ -124,7 +124,7 @@ $results
  [1] -84.23698 -84.13235 -84.13171 -84.14765 -84.14498 -84.13035 -84.09755 -84.08554 -84.15069 -84.13690
 ```
 ### Prior sampling
-The function `prior_sampling` allows a user to specify one of BGL, GHS, or G-Wishart and any related parameters and sample `burnin + nmc` iterations of an MCMC sampler modified slightly from a highly similar approach used in `evidence`. This code will execute 2,000 total iterations for the prior of GHS with `lambda=2` and dimension `p=5`.
+The function `prior_sampling` allows a user to specify one of BGL, GHS, or G-Wishart and any related parameters and sample `burnin + nmc` iterations of an MCMC sampler on the precision matrix modified slightly from a highly similar approach used in `evidence`. This code will execute 2,000 total iterations and discard the first half for the prior of GHS with `lambda=2` and dimension `p=5`.
 ```
 > samples <- prior_sampling(5, 1e3, 1e3, prior_name='GHS', lambda=2)
 > dim(samples)
