@@ -17,7 +17,7 @@ This package allows estimation of marginal likelihood in Gaussian graphical mode
 ### Prebuilt tests
 First, we can use entirely pre-determined test parameters and a fixed random seed to verify the package is working as expected. The function `test_evidence` can be called by specifying the number of complete runs for the marginal estimation and what prior should be tested (currently implemented options are: 'Wishart', 'BGL', 'GHS', 'G_Wishart').  The dimension of all data tested using this function is set to `p=5`. 
 ```
-> test_evidence(10, 'Wishart')
+> test_evidence(num_runs=10, 'Wishart')
 ```
 The console will display the parameters tested, as well as display the results using a histogram if more than 1 run is requested. The average computation time per run will be displayed, and the entire results vector, as well as the mean and standard deviation of this vector will be returned.
 ```
