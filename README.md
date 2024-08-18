@@ -15,7 +15,7 @@ This package allows estimation of marginal likelihood in Gaussian graphical mode
 ## Examples
 
 ### Prebuilt tests
-First, we can use entirely pre-determined test parameters and a fixed random seed to verify the package is working as expected. The function `test_evidence` can be called by specifying the number of complete runs for the marginal estimation and what prior should be tested.  The dimension of all data tested using this function is set to `p=5`. 
+First, we can use entirely pre-determined test parameters and a fixed random seed to verify the package is working as expected. The function `test_evidence` can be called by specifying the number of complete runs for the marginal estimation and what prior should be tested (currently implemented options are: 'Wishart', 'BGL', 'GHS', 'G_Wishart').  The dimension of all data tested using this function is set to `p=5`. 
 ```
 > test_evidence(10, 'Wishart')
 ```
@@ -88,6 +88,7 @@ We now consider the top level function used to estimate marginal likelihood. The
 # Compute the marginal likelihood of x_mat for Wishart prior using 1,000 
 # burnin and 5,000 sampled values at each call to the MCMC sampler with
 # 10 total runs of the estimator
+# Change prior name to 'Wishart', 'BGL', 'GHS', 'G_Wishart' as desired.
 > g_params <- gen_params_evidence('Wishart')
 > evidence(
 	xx=g_params$x_mat, burnin=1e3, nmc=5e3, prior_name='Wishart', 
@@ -124,7 +125,7 @@ $results
  [1] -84.23698 -84.13235 -84.13171 -84.14765 -84.14498 -84.13035 -84.09755 -84.08554 -84.15069 -84.13690
 ```
 ### Prior sampling
-The function `prior_sampling` allows a user to specify one of BGL, GHS, or G-Wishart and any related parameters and sample `burnin + nmc` iterations of an MCMC sampler on the precision matrix modified slightly from a highly similar approach used in `evidence`. This code will execute 2,000 total iterations and discard the first half for the prior of GHS with `lambda=2` and dimension `p=5`.
+The function `prior_sampling` allows a user to specify one of BGL, GHS, or G_Wishart and any related parameters and sample `burnin + nmc` iterations of an MCMC sampler on the precision matrix modified slightly from a highly similar approach used in `evidence`. This code will execute 2,000 total iterations and discard the first half for the prior of GHS with `lambda=2` and dimension `p=5`.
 ```
 > samples <- prior_sampling(5, 1e3, 1e3, prior_name='GHS', lambda=2)
 > dim(samples)
