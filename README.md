@@ -127,7 +127,7 @@ $results
 ### Prior sampling
 The function `prior_sampling` allows a user to specify one of BGL, GHS, or G_Wishart and any related parameters and sample `burnin + nmc` iterations of an MCMC sampler on the precision matrix modified slightly from a highly similar approach used in `evidence`. This code will execute 2,000 total iterations and discard the first half for the prior of GHS with `lambda=2` and dimension `p=5`.
 ```
-> samples <- prior_sampling(5, 1e3, 1e3, prior_name='GHS', lambda=2)
+> samples <- prior_sampling(p=5, burnin=1e3, nmc=1e3, prior_name='GHS', lambda=2)
 > dim(samples)
 [1]    5    5 1000
 > samples[, , 1000]
