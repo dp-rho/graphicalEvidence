@@ -11,25 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// print_times
-void print_times(const int nruns);
-RcppExport SEXP _graphicalEvidence_print_times(SEXP nrunsSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const int >::type nruns(nrunsSEXP);
-    print_times(nruns);
-    return R_NilValue;
-END_RCPP
-}
-// reset_times
-void reset_times();
-RcppExport SEXP _graphicalEvidence_reset_times() {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    reset_times();
-    return R_NilValue;
-END_RCPP
-}
 // rgamma_compiled
 NumericVector rgamma_compiled(int n, NumericVector vec_shapes, NumericVector vec_rates);
 RcppExport SEXP _graphicalEvidence_rgamma_compiled(SEXP nSEXP, SEXP vec_shapesSEXP, SEXP vec_ratesSEXP) {
@@ -41,30 +22,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type vec_rates(vec_ratesSEXP);
     rcpp_result_gen = Rcpp::wrap(rgamma_compiled(n, vec_shapes, vec_rates));
     return rcpp_result_gen;
-END_RCPP
-}
-// bind_random_samples
-void bind_random_samples(NumericVector rgammas, NumericVector rnorms);
-RcppExport SEXP _graphicalEvidence_bind_random_samples(SEXP rgammasSEXP, SEXP rnormsSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type rgammas(rgammasSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type rnorms(rnormsSEXP);
-    bind_random_samples(rgammas, rnorms);
-    return R_NilValue;
-END_RCPP
-}
-// bind_random_samples_rmatrix
-void bind_random_samples_rmatrix(NumericVector rgammas, NumericVector rnorms, NumericVector rgigs, NumericVector runis);
-RcppExport SEXP _graphicalEvidence_bind_random_samples_rmatrix(SEXP rgammasSEXP, SEXP rnormsSEXP, SEXP rgigsSEXP, SEXP runisSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type rgammas(rgammasSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type rnorms(rnormsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type rgigs(rgigsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type runis(runisSEXP);
-    bind_random_samples_rmatrix(rgammas, rnorms, rgigs, runis);
-    return R_NilValue;
 END_RCPP
 }
 // mcmc_hw
@@ -202,11 +159,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_graphicalEvidence_print_times", (DL_FUNC) &_graphicalEvidence_print_times, 1},
-    {"_graphicalEvidence_reset_times", (DL_FUNC) &_graphicalEvidence_reset_times, 0},
     {"_graphicalEvidence_rgamma_compiled", (DL_FUNC) &_graphicalEvidence_rgamma_compiled, 3},
-    {"_graphicalEvidence_bind_random_samples", (DL_FUNC) &_graphicalEvidence_bind_random_samples, 2},
-    {"_graphicalEvidence_bind_random_samples_rmatrix", (DL_FUNC) &_graphicalEvidence_bind_random_samples_rmatrix, 4},
     {"_graphicalEvidence_mcmc_hw", (DL_FUNC) &_graphicalEvidence_mcmc_hw, 10},
     {"_graphicalEvidence_mcmc_hw_rmatrix", (DL_FUNC) &_graphicalEvidence_mcmc_hw_rmatrix, 9},
     {"_graphicalEvidence_mcmc_last_col", (DL_FUNC) &_graphicalEvidence_mcmc_last_col, 11},

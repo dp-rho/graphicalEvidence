@@ -1,11 +1,5 @@
 /* prototypes.h */
 
-/* Functions in inject_random.cpp */
-double extract_rgamma();
-double extract_rgig();
-double extract_runi();
-void extract_rnorm(double*, unsigned int);
-
 /* Functions in GammaSampler.cpp  */
 double gamma_density(const double, const double, const double);
 

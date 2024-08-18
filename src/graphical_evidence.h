@@ -19,10 +19,8 @@
 #include <cblas.h>
 #include "simd_intrinsics.h"
 #include "global_storage.h"
-#include "FunctionTimer.h"
 #include "GammaSampler.h"
 #include "prototypes.h"
 #include "looping_dmvnrm_arma.h"
-#include "inject_random.h"
 
 using namespace Rcpp;
