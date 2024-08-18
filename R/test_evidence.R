@@ -71,7 +71,10 @@ test_evidence <- function(
   
   # Visually plot multiple runs in a histogram
   if (num_runs > 1) {
-    hist(estimated_marginal_store$results, breaks=40)
+    hist(
+      estimated_marginal_store$results, xlab='estimated marginal', 
+      main='Histogram of Results', breaks=40
+    )
   }
   return(estimated_marginal_store)
 }

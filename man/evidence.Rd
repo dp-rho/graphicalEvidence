@@ -72,7 +72,7 @@ should be independent of column permutation.
 # Compute the marginal 10 times with random column permutations of xx at each
 # individual run for G-Wishart prior using 2,000 burnin and 10,000 sampled
 # values at each call to the MCMC sampler
-g_params <- gen_params_G_Wishart()
+g_params <- gen_params_evidence('G_wishart')
 marginal_results <- evidence(
   g_params$x_mat, 2e3, 1e4, 'G_Wishart', 10, alpha=2, 
   V=g_params$scale_mat, G=g_params$g_mat

@@ -54,9 +54,9 @@ priors: Wishart, Bayesian Graphical Lasso (BGL), and Graphical Horseshoe
 (GHS), specified under prior_name.
 }
 \examples{
-# Compute the marginal likelihood of xx at each for GHS prior using 1,000 
-burnin and 5,000 sampled values at each call to the MCMC sampler
-g_params <- gen_params_GHS()
+# Compute the marginal likelihood of xx for GHS prior using 1,000 
+# burnin and 5,000 sampled values at each call to the MCMC sampler
+g_params <- gen_params_evidence('GHS')
 marginal_results <- graphical_evidence_rmatrix(
   g_params$x_mat, 1e3, 5e3, 'GHS', lambda=1
 )
