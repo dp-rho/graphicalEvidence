@@ -15,16 +15,12 @@
 #' marginal likelihood
 #' @param prior_name The name of the prior for which the marginal should be 
 #' calculated, this is one of 'Wishart', 'BGL', 'GHS'
-#' @param print_progress A boolean which indicates whether progress should be 
-#' displayed on the console as each row of the telescoping sum is computed
-#' @param permute_columns A boolean which indicates whether columns of xx for
-#' runs beyond the first should be randomly permuted to ensure that 
-#' marginal calculation is consistent across different column permutations
-#' @param alpha A number specifying alpha for the priors of 'Wishart'
 #' @param lambda A number specifying lambda for the priors of 'BGL' and 'GHS'
 #' prior
+#' @param alpha A number specifying alpha for the priors of 'Wishart'
 #' @param V The scale matrix when specifying 'Wishart'
-#' 
+#' @param print_progress A boolean which indicates whether progress should be 
+#' displayed on the console as each row of the telescoping sum is computed
 #' 
 #' @returns An estimate for the marginal likelihood under specified prior with
 #' the specified parameters
