@@ -9,6 +9,15 @@ RcppArmadillo package implementation for the proposed technique [1] to compute m
 
 4. G-Wishart
 
+## Installation
+This package can be installed directly from github using the R package `devtools`.
+
+```
+> install.packages("devtools")
+> library(devtools)
+> install_github("dp-rho/graphicalEvidence")
+```
+
 ## Description:
 This package allows estimation of marginal likelihood in Gaussian graphical models through a novel telescoping block decomposition of the precision matrix which allows estimation of model evidence via an application of Chib's [2] method. This package also provides an MCMC prior sampler for the priors of BGL, GHS, and G-Wishart.
 
