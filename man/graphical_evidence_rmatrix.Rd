@@ -39,10 +39,6 @@ prior}
 
 \item{print_progress}{A boolean which indicates whether progress should be 
 displayed on the console as each row of the telescoping sum is computed}
-
-\item{permute_columns}{A boolean which indicates whether columns of xx for
-runs beyond the first should be randomly permuted to ensure that 
-marginal calculation is consistent across different column permutations}
 }
 \value{
 An estimate for the marginal likelihood under specified prior with

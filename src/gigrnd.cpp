@@ -50,45 +50,24 @@ double gigrnd(
   double sd = s - (p * theta);
   double q = td + sd;
 
-  /*
-  arma::cout << "x: " << x << arma::endl;
-  arma::cout << "t: " << t << arma::endl;
-  arma::cout << "s: " << s << arma::endl;
-  arma::cout << "eta: " << eta << arma::endl;
-  arma::cout << "zeta: " << zeta << arma::endl;
-  arma::cout << "theta: " << theta << arma::endl;
-  arma::cout << "xi: " << xi << arma::endl;
-  arma::cout << "p: " << p << arma::endl;
-  arma::cout << "r: " << r << arma::endl;
-  arma::cout << "td: " << td << arma::endl;
-  arma::cout << "sd: " << sd << arma::endl;
-  arma::cout << "q: " << q << arma::endl; */
-
   /* Loop until sample is valid */
   double sample;
   bool done = false;
   while (!done) {
+
     double U = arma::randu();
     double V = arma::randu();
     double W = arma::randu();
-    //double U = extract_runi();
-    //double V = extract_runi();
-    //double W = extract_runi();
-    //arma::cout << "U V W: " << U << " " << V << " " << W << " " << arma::endl;
+
     if (U < (q / (p + q + r))) {
-      //arma::cout << "case1" << arma::endl;
       sample = -sd + (q * V);
     }
     else if (U < ((q + r) / (p + q + r))) {
-      //arma::cout << "case2" << arma::endl;
       sample = td - (r * log(V));
     }
     else {
-      //arma::cout << "case3" << arma::endl;
       sample = -sd + (p * log(V));
     }
-
-    //arma::cout << "sample selected in loop " << sample << arma::endl;
 
     double f1 = exp(-eta - zeta * (sample - t));
     double f2 = exp(-theta + xi * (sample + s));
@@ -99,7 +78,6 @@ double gigrnd(
   }
   sample = exp(sample) * (lambda / omega + sqrt(1 + pow(lambda / omega, 2)));
   if (swap) {
-    //arma::cout << "did swap" << arma::endl;
     sample = 1 / sample;
   }
   return(sample / sqrt(a / b));
