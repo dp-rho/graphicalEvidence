@@ -114,7 +114,7 @@ void sample_omega_last_col(
         &uplo, &lapack_dim, &nrhs, g_mat1, &lapack_dim, g_vec2, &lapack_dim, &info_int
       );
       if (info_int > 0) {
-        arma::cout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
+        Rcout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
       }
 
       /* Assign random normals to g_vec1 to solve for beta ones */

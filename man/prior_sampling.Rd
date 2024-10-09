@@ -10,7 +10,7 @@ prior_sampling(
   nmc,
   prior_name = c("BGL", "GHS", "G_Wishart"),
   G = NULL,
-  v = NULL,
+  V = NULL,
   alpha = NULL,
   lambda = NULL
 )
@@ -28,13 +28,13 @@ calculated, this is one of 'Wishart', 'BGL', 'GHS', 'G_Wishart'}
 
 \item{G}{The adjacency matrix when specifying 'G_Wishart' prior}
 
+\item{V}{The scale matrix when specifying 'Wishart' or 'G_Wishart' prior}
+
 \item{alpha}{A number specifying alpha for the priors of 'Wishart' and 
 'G_Wishart'}
 
 \item{lambda}{A number specifying lambda for the priors of 'BGL' and 'GHS'
 prior}
-
-\item{V}{The scale matrix when specifying 'Wishart' or 'G_Wishart' prior}
 }
 \value{
 An array of dim nmc x p x p where each p x p slice is one sample of 

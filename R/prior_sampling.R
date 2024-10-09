@@ -32,7 +32,7 @@ prior_sampling <- function(
     nmc,
     prior_name = c('BGL', 'GHS', 'G_Wishart'),
     G = NULL, 
-    v = NULL, 
+    V = NULL, 
     alpha = NULL,
     lambda = NULL
 ) {
@@ -62,8 +62,8 @@ prior_sampling <- function(
     
     # Implemented in C++
     'G_Wishart' = prior_sampler_G_Wishart(
-      p, burnin, nmc, as.matrix(G_mat_adj), 
-      as.matrix(scale_matrix), alpha
+      p, burnin, nmc, as.matrix(G), 
+      as.matrix(V), alpha
     )
   )
   

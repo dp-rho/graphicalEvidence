@@ -44,6 +44,10 @@ graphical_evidence_rmatrix <- function(
   print_progress = FALSE
 ) {
   
+  # Ensure arguments are matrices
+  xx <- as.matrix(xx)
+  V <- as.matrix(V)
+  
   # Match arg on prior name
   prior_name <- match.arg(prior_name)
   

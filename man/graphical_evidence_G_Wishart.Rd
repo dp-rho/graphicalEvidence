@@ -45,8 +45,8 @@ graphical evidence.
 \examples{
 # Compute the marginal likelihood of xx for G-Wishart prior using 
 # 2,000 burnin and 10,000 sampled values at each call to the MCMC sampler
-g_params <- gen_params_evidence('G_wishart')
+g_params <- gen_params_evidence('G_Wishart')
 marginal_results <- graphical_evidence_G_Wishart(
-  g_params$x_mat, 2e3, 1e4, 2, g_params$scale_mat, G=g_params$g_mat
+  g_params$x_mat, 2e3, 1e4, 2, g_params$scale_mat, g_params$g_mat
 )
 }

@@ -116,7 +116,7 @@ void sample_omega_hw_rmatrix(
       &uplo, &dim, &nrhs, inv_c.memptr(), &dim, solve_for.memptr(), &dim, &info_int
     );
     if (info_int > 0) {
-      arma::cout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
+      Rcout << "Error: LAPACK dposv failed, matrix is singular" << arma::endl;
     }
 
     /* Save mu_i before memory is used to calculate beta  */

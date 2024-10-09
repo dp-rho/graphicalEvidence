@@ -24,9 +24,9 @@
 #' @examples
 #' # Compute the marginal likelihood of xx for G-Wishart prior using 
 #' # 2,000 burnin and 10,000 sampled values at each call to the MCMC sampler
-#' g_params <- gen_params_evidence('G_wishart')
+#' g_params <- gen_params_evidence('G_Wishart')
 #' marginal_results <- graphical_evidence_G_Wishart(
-#'   g_params$x_mat, 2e3, 1e4, 2, g_params$scale_mat, G=g_params$g_mat
+#'   g_params$x_mat, 2e3, 1e4, 2, g_params$scale_mat, g_params$g_mat
 #' )
 #' @export
 graphical_evidence_G_Wishart <- function(
@@ -38,6 +38,11 @@ graphical_evidence_G_Wishart <- function(
   G,
   print_progress = FALSE
 ) {
+  
+  # Ensure arguments are matrices
+  xx <- as.matrix(xx)
+  V <- as.matrix(V)
+  G <- as.matrix(G)
   
   # Calculate sample covariance matrix
   S <- as.matrix(t(xx) %*% xx)

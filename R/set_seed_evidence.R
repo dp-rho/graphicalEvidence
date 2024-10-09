@@ -1,16 +1,17 @@
-#' set_seed_evidence
+#' @title Set the Random Seed
 #'
-#' This is a private function that sets the compiled and interpreted seed
-#' so that estimation and sampling done with graphicalEvidence will be 
-#' reproducible
+#' @description
+#' Sets the random seed of both the R session (using set.seed) and the compiled
+#' sampler, as both samplers are used during any calls to evidence(...) or 
+#' prior_sampling(...)
 #' 
 #' @param seed a random seed that will be passed to the interpreted random 
 #' number generator using set.seed, and will be passed to the compiled random
 #' number generator using private Rcpp package function set_seed
 #' 
 #' @returns NULL
-#' @keywords internal
-#' @noRd
+#' @examples
+#' set_seed_evidence(42)
 set_seed_evidence <- function(
     seed
 ) {
