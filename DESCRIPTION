@@ -3,7 +3,10 @@ Type: Package
 Title: Graphical Evidence
 Version: 1.0
 Date: 2024-10-07
-Author: David Rowe
+Authors@R: person(given = "David",
+                    family = "Rowe",
+                    role = c("aut", "cre"),
+                    email = "david@rowe-stats.com")
 Maintainer: David Rowe <david@rowe-stats.com>
 Description: Calculate the marginal likelihood using graphical evidence.
 License: file LICENSE
