@@ -3,7 +3,7 @@
 \alias{graphicalEvidence}
 \docType{package}
 \title{
-  Computer Marginal Likelihood in Gaussian Graphical Models
+  Compute Marginal Likelihood in Gaussian Graphical Models
 }
 \description{
   This package allows estimation of marginal likelihood in Gaussian graphical 
@@ -16,7 +16,6 @@
   Bayesian Graphical Lasso ("BGL"), graphical horseshoe ("GHS"), and 
   "G-Wishart". An MCMC prior sampler is also provided for "BGL", "GHS", and
   "G-Wishart".
-  
   
   This version was installed directly from GitHub and may be less portable.
   This package attempts to compile and link with C/C++ libraries of OpenMp, 
