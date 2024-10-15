@@ -53,7 +53,7 @@ List mcmc_hw(
   arma::uword total_iters = static_cast<arma::uword>(burnin + nmc);
 
   /* Generate gamma sampling parameters */
-  double scale_params[p];
+  double scale_params[MAX_DIM];
   const double shape_param = alpha + ((double)n / 2) + 1;
   for (unsigned int i = 0; i < (unsigned int) p; i++) {
     scale_params[i] = 2 / (s_mat.at(i, i) + scale_mat.at(i, i));

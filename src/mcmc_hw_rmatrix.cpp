@@ -68,7 +68,7 @@ List mcmc_hw_rmatrix(
 
   /* Generate gamma paramters for the MCMC sampling */
   double shape = 0;
-  double scale_vec[p] = {0};
+  double scale_vec[MAX_DIM] = {0};
   get_gamma_params_hw_rmatrix(&shape, scale_vec, prior, dof, n, lambda, s_mat);
 
   /* Run MCMC */

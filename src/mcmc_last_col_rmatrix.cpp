@@ -44,7 +44,7 @@ List mcmc_last_col_rmatrix(
 
   /* Set gamma parameters and calculation memory dependent on prior,  */
   /* and reduce matrices to p_reduced dim where needed                */  
-  double scale_params[p];
+  double scale_params[MAX_DIM];
   double shape_param = 0;
   arma::mat inv_c = arma::zeros(p_reduced - 1, p_reduced - 1);
   arma::mat inv_omega_11 = arma::zeros(p_reduced - 1, p_reduced - 1);
