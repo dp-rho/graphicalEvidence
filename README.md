@@ -24,7 +24,7 @@ Alternatively, a version of this package can be installed from CRAN using:
 > install.packages('graphicalEvidence')
 ```
 
-It should be noted that the version distributed on CRAN is more portable, but also slower. The version distributed directly from GitHub attempts to force compilation with AVX/SSE flags if possible using the `RcppXsimd` package, and also attempts to compile with both LAPACKE and OpenBLAS. These interfaces are not availabe on some systems, and so the version distributed on CRAN uses RcppArmadillo exclusively for all linear algebra routines. The version distributed on CRAN may be anywhere from 2-10x slower.
+It should be noted that the version distributed on CRAN is more portable, but also slower. The version distributed directly from GitHub attempts to force compilation with AVX/SSE flags if possible using the `RcppXsimd` package, and also attempts to compile with both LAPACKE and OpenBLAS. These interfaces are not available on some systems, and so the version distributed on CRAN uses RcppArmadillo exclusively for all linear algebra routines. The version distributed on CRAN may be anywhere from 2-10x slower.
 
 ## Description:
 This package allows estimation of marginal likelihood in Gaussian graphical models through a novel telescoping block decomposition of the precision matrix which allows estimation of model evidence via an application of Chib's [2] method. This package also provides an MCMC prior sampler for the priors of BGL, GHS, and G-Wishart.
