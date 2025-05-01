@@ -157,7 +157,7 @@ The function `prior_sampling` allows a user to specify one of BGL, GHS, or G_Wis
 ```
 
 ## References:
-[1] Bhadra, A., Sagar, K., Rowe, D., Banerjee, S., & Datta, J. (2022). Evidence Estimation in Gaussian Graphical Models Using a Telescoping Block Decomposition of the Precision Matrix. arXiv preprint [arXiv:2205.01016](https://arxiv.org/abs/2205.01016).
+[1] Bhadra, A., Sagar, K., Rowe, D., Banerjee, S., & Datta, J. (2022). Evidence Estimation in Gaussian Graphical Models Using a Telescoping Block Decomposition of the Precision Matrix. Journal of Machine Learning [arXiv:2205.01016](https://jmlr.org/papers/v25/23-0254.html).
 
 [2] Chib, S. (1995). Marginal likelihood from the Gibbs output. Journal of the American Statistical
 Association 90, 1313–1321.
